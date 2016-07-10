@@ -11,13 +11,38 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ListRowViewHolder.class.getSimpleName();
     private final ListRowViewHolder self = this;
 
-
-    protected ImageView imageView;
-    protected TextView textView;
+    protected ImageView imvThumbnail;
+    protected TextView txtMealMenu;
+    protected TextView txtMealDate;
 
     public ListRowViewHolder(View view) {
         super(view);
-        this.imageView = (ImageView) view.findViewById(R.id.imvThumbnail);
-        this.textView = (TextView) view.findViewById(R.id.txtMealMenu);
+        this.imvThumbnail = (ImageView) view.findViewById(R.id.imvThumbnail);
+        this.txtMealMenu = (TextView) view.findViewById(R.id.txtMealMenu);
+        this.txtMealDate = (TextView) view.findViewById(R.id.txtMealDate);
+    }
+
+    public ImageView getImvThumbnail() {
+        return imvThumbnail;
+    }
+
+    public TextView getTxtMealMenu() {
+        return txtMealMenu;
+    }
+
+    public void setImvThumbnail(ImageView imvThumbnail) {
+        this.imvThumbnail = imvThumbnail;
+    }
+
+    public void setTxtMealMenu(TextView txtMealMenu) {
+        this.txtMealMenu = txtMealMenu;
+    }
+
+    public TextView getTxtMealDate() {
+        return txtMealDate;
+    }
+
+    public void setTxtMealDate(TextView txtMealDate) {
+        this.txtMealDate = txtMealDate;
     }
 }

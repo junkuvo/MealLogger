@@ -3,20 +3,26 @@ package junkuvo.apps.meallogger;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
+
 public class ActivityLogListAll extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_activity_log_list_all);
+        setContentView(R.layout.activity_log_list_all);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        final ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new LogListPagerAdapter(getSupportFragmentManager()));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
@@ -26,7 +32,6 @@ public class ActivityLogListAll extends AppCompatActivity {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
                 Intent intent = new Intent(ActivityLogListAll.this, ActivityLogRegister.class);
-//                intent.putExtra("foo", someData);
                 startActivity(intent);
             }
         });
