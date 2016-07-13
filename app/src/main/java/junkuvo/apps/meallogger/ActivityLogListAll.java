@@ -1,7 +1,11 @@
 package junkuvo.apps.meallogger;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
+import junkuvo.apps.meallogger.service.NotificationService;
 
 public class ActivityLogListAll extends AppCompatActivity {
 
@@ -35,6 +40,11 @@ public class ActivityLogListAll extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
+        startService(intent);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -58,4 +68,30 @@ public class ActivityLogListAll extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        killAlertService();
+    }
+
+    public void killAlertService() {
+        unbindService(mServiceConnection); // バインド解除
+        mNotificationService.stopSelf(); // サービスは必要ないので終了させる。
+    }
+
+    private NotificationService mNotificationService;
+
+    // ServiceとActivityをBindするクラス
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mNotificationService = ((NotificationService.NotificationBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName className) {
+            mNotificationService = null;
+        }
+    };
 }

@@ -20,6 +20,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".ActivityLogRegister"></activity>
+
+        <service
+            android:name=".service.NotificationService"
+            android:enabled="true" />
     </application>
 
 </manifest>
