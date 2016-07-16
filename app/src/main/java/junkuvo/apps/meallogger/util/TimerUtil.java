@@ -7,14 +7,20 @@ import java.util.TimerTask;
 public class TimerUtil extends TimerTask {
     private static final String TAG = TimerUtil.class.getSimpleName();
     private final TimerUtil self = this;
-    private Handler handler = new Handler();
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
 
     @Override
     public void run() {
-        // handlerを使って処理をキューイングする
-        handler.post(new Runnable() {
+        new Runnable() {
             public void run() {
             }
-        });
+        };
     }
+//
+//    public long getFireDurationMilliSec(Date){
+//
+//    }
+
+
 }
