@@ -62,13 +62,22 @@
                         <!--android:gravity="left"-->
                         <!--android:padding="0dp" />-->
 
-                    <android.support.v7.widget.SwitchCompat
+                    <!--<android.support.v7.widget.SwitchCompat-->
+                        <!--android:id="@+id/repeat_switch"-->
+                        <!--style="@style/Widget.Holo.Light.CompoundButton.Switch"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_gravity="center_vertical"-->
+                        <!--android:layout_marginLeft="4dp" />-->
+
+                    <com.codetroopers.betterpickers.recurrencepicker.WeekButton
                         android:id="@+id/repeat_switch"
-                        style="@style/Widget.Holo.Light.CompoundButton.Switch"
+                        style="@style/RecurrenceDayOfWeekStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="4dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -92,6 +101,7 @@
                         <TextView
                             android:id="@+id/intervalPreText"
                             style="@style/TextAppearance.RecurrencePickerStyle"
+                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 
@@ -108,11 +118,13 @@
                             android:paddingRight="4dp"
                             android:selectAllOnFocus="true"
                             android:singleLine="true"
+                            android:visibility="gone"
                             android:textSize="15sp"></EditText>
 
                         <TextView
                             android:id="@+id/intervalPostText"
                             style="@style/TextAppearance.RecurrencePickerStyle"
+                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
@@ -124,8 +136,10 @@
                         android:layout_marginLeft="4dp"
                         android:layout_marginRight="4dp"
                         android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
                         android:gravity="center_horizontal"
                         android:orientation="horizontal">
+
 
                         <com.codetroopers.betterpickers.recurrencepicker.WeekButton style="@style/RecurrenceDayOfWeekStyle" />
 
@@ -191,19 +205,19 @@
                         android:orientation="horizontal"
                         android:paddingLeft="0dp">
 
-                        <Spinner
-                            android:id="@+id/endSpinner"
-                            style="@style/TextAppearance.RecurrencePickerStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="-4dp"
-                            android:layout_marginRight="8dp"
-                            android:background="@drawable/spinner_background_holo_light"
-                            android:dropDownSelector="@drawable/item_background_holo_light"
-                            android:entries="@array/recurrence_freq"
-                            android:gravity="left|center_vertical"
-                            android:padding="0dp" />
+                        <!--<Spinner-->
+                            <!--android:id="@+id/endSpinner"-->
+                            <!--style="@style/TextAppearance.RecurrencePickerStyle"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:layout_marginLeft="-4dp"-->
+                            <!--android:layout_marginRight="8dp"-->
+                            <!--android:background="@drawable/spinner_background_holo_light"-->
+                            <!--android:dropDownSelector="@drawable/item_background_holo_light"-->
+                            <!--android:entries="@array/recurrence_freq"-->
+                            <!--android:gravity="left|center_vertical"-->
+                            <!--android:padding="0dp" />-->
 
                         <EditText
                             android:id="@+id/endCount"
@@ -218,7 +232,8 @@
                             android:maxLength="3"
                             android:selectAllOnFocus="true"
                             android:singleLine="true"
-                            android:textSize="15sp" />
+                        android:visibility="gone"
+                        android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/postEndCount"
@@ -254,10 +269,9 @@
                     </LinearLayout>
                 </LinearLayout>
                 <TimePicker
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/timePicker"
-                    android:layout_marginTop="16dp"
                     android:layout_below="@+id/txtSensitivityTitle"
                     android:layout_centerHorizontal="true" />
             </LinearLayout>

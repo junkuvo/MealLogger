@@ -17,6 +17,7 @@
 package com.codetroopers.betterpickers.recurrencepicker;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -54,10 +55,12 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.codetroopers.betterpickers.R;
+import com.codetroopers.betterpickers.SharedPreferencesUtil;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
 import java.text.DateFormatSymbols;
@@ -71,9 +74,11 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         CalendarDatePickerDialogFragment.OnDateSetListener {
 
     private static final String TAG = "RecurrencePickerDialogFragment";
+    public static final String SHARED_PREF_KEY_RULE = "rule";
+    public static final String SHARED_PREF_KEY_REPEAT = "repeat";
 
     // in dp's
-    private static final int MIN_SCREEN_WIDTH_FOR_SINGLE_ROW_WEEK = 450;
+    private static final int MIN_SCREEN_WIDTH_FOR_SINGLE_ROW_WEEK = 45;
 
     // Update android:maxLength in EditText as needed
     private static final int INTERVAL_MAX = 99;
@@ -347,7 +352,10 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
     private static final String FRAG_TAG_DATE_PICKER = "tag_date_picker_frag";
 
-    private SwitchCompat mRepeatSwitch;
+//    private SwitchCompat mRepeatSwitch;
+    private WeekButton mRepeatSwitch;
+
+    private TimePicker mTimePicker;
 
     private EditText mInterval;
     private TextView mIntervalPreText;
@@ -355,7 +363,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
     private int mIntervalResId = -1;
 
-    private Spinner mEndSpinner;
+//    private Spinner mEndSpinner;
     private TextView mEndDateTextView;
     private EditText mEndCount;
     private TextView mPostEndCount;
@@ -708,7 +716,8 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         final Activity activity = getActivity();
         final Configuration config = activity.getResources().getConfiguration();
 
-        mRepeatSwitch = (SwitchCompat) mView.findViewById(R.id.repeat_switch);
+//        mRepeatSwitch = (SwitchCompat) mView.findViewById(R.id.repeat_switch);
+        mRepeatSwitch = (WeekButton) mView.findViewById(R.id.repeat_switch);
         if (mModel.forceHideSwitchButton) {
             mRepeatSwitch.setChecked(true);
             mRepeatSwitch.setVisibility(View.GONE);
@@ -724,6 +733,8 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                 }
             });
         }
+        mTimePicker = (TimePicker)mView.findViewById(R.id.timePicker);
+
 //        mFreqSpinner = (Spinner) mView.findViewById(R.id.freqSpinner);
 //        mFreqSpinner.setOnItemSelectedListener(this);
 //        ArrayAdapter<CharSequence> freqAdapter = ArrayAdapter.createFromResource(getActivity(),
@@ -752,12 +763,12 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         mEndSpinnerArray.add(mEndNeverStr);
         mEndSpinnerArray.add(mEndDateLabel);
         mEndSpinnerArray.add(mEndCountLabel);
-        mEndSpinner = (Spinner) mView.findViewById(R.id.endSpinner);
-        mEndSpinner.setOnItemSelectedListener(this);
+//        mEndSpinner = (Spinner) mView.findViewById(R.id.endSpinner);
+//        mEndSpinner.setOnItemSelectedListener(this);
         mEndSpinnerAdapter = new EndSpinnerAdapter(getActivity(), mEndSpinnerArray,
                 R.layout.recurrencepicker_freq_item, R.layout.recurrencepicker_end_text);
         mEndSpinnerAdapter.setDropDownViewResource(R.layout.recurrencepicker_freq_item);
-        mEndSpinner.setAdapter(mEndSpinnerAdapter);
+//        mEndSpinner.setAdapter(mEndSpinnerAdapter);
 
         mEndCount = (EditText) mView.findViewById(R.id.endCount);
         mEndCount.addTextChangedListener(new minMaxTextWatcher(1, COUNT_DEFAULT, COUNT_MAX) {
@@ -897,6 +908,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
         mDoneButton = (Button) mView.findViewById(R.id.done_button);
         mDoneButton.setOnClickListener(this);
+        setDialogStatus();
 
         Button cancelButton = (Button) mView.findViewById(R.id.cancel_button);
         //FIXME no text color for this one ?
@@ -915,10 +927,19 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         return mView;
     }
 
+    private void setDialogStatus(){
+        int idx;
+        for (idx = 0; idx < mWeekByDayButtons.length; idx++){
+            mWeekByDayButtons[idx].setChecked(SharedPreferencesUtil.getBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString()));
+        }
+        mRepeatSwitch.setChecked(SharedPreferencesUtil.getBoolean(getContext(),SHARED_PREF_KEY_REPEAT));
+
+    }
+
     private void togglePickerOptions() {
         if (mModel.recurrenceState == RecurrenceModel.STATE_NO_RECURRENCE) {
 //            mFreqSpinner.setEnabled(false);
-            mEndSpinner.setEnabled(false);
+//            mEndSpinner.setEnabled(false);
             mIntervalPreText.setEnabled(false);
             mInterval.setEnabled(false);
             mIntervalPostText.setEnabled(false);
@@ -931,10 +952,11 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             for (Button button : mWeekByDayButtons) {
                 button.setEnabled(false);
             }
+            mTimePicker.setEnabled(false);
         } else {
             mView.findViewById(R.id.options).setEnabled(true);
 //            mFreqSpinner.setEnabled(true);
-            mEndSpinner.setEnabled(true);
+//            mEndSpinner.setEnabled(true);
             mIntervalPreText.setEnabled(true);
             mInterval.setEnabled(true);
             mIntervalPostText.setEnabled(true);
@@ -947,6 +969,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             for (Button button : mWeekByDayButtons) {
                 button.setEnabled(true);
             }
+            mTimePicker.setEnabled(true);
         }
         updateDoneButtonState();
     }
@@ -1059,7 +1082,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         updateIntervalText();
         updateDoneButtonState();
 
-        mEndSpinner.setSelection(mModel.end);
+//        mEndSpinner.setSelection(mModel.end);
         if (mModel.end == RecurrenceModel.END_BY_DATE) {
             final String dateStr = DateUtils.formatDateTime(getActivity(),
                     mModel.endDate.toMillis(false), DateUtils.FORMAT_NUMERIC_DATE);
@@ -1150,34 +1173,34 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 //        if (parent == mFreqSpinner) {
 //            mModel.freq = position;
 //        } else
-        if (parent == mEndSpinner) {
-            switch (position) {
-                case RecurrenceModel.END_NEVER:
-                    mModel.end = RecurrenceModel.END_NEVER;
-                    break;
-                case RecurrenceModel.END_BY_DATE:
-                    mModel.end = RecurrenceModel.END_BY_DATE;
-                    break;
-                case RecurrenceModel.END_BY_COUNT:
-                    mModel.end = RecurrenceModel.END_BY_COUNT;
-
-                    if (mModel.endCount <= 1) {
-                        mModel.endCount = 1;
-                    } else if (mModel.endCount > COUNT_MAX) {
-                        mModel.endCount = COUNT_MAX;
-                    }
-                    updateEndCountText();
-                    break;
-            }
-            mEndCount.setVisibility(mModel.end == RecurrenceModel.END_BY_COUNT ? View.VISIBLE
-                    : View.GONE);
-            mEndDateTextView.setVisibility(mModel.end == RecurrenceModel.END_BY_DATE ? View.VISIBLE
-                    : View.GONE);
-            mPostEndCount.setVisibility(
-                    mModel.end == RecurrenceModel.END_BY_COUNT && !mHidePostEndCount ?
-                            View.VISIBLE : View.GONE);
-
-        }
+//        if (parent == mEndSpinner) {
+//            switch (position) {
+//                case RecurrenceModel.END_NEVER:
+//                    mModel.end = RecurrenceModel.END_NEVER;
+//                    break;
+//                case RecurrenceModel.END_BY_DATE:
+//                    mModel.end = RecurrenceModel.END_BY_DATE;
+//                    break;
+//                case RecurrenceModel.END_BY_COUNT:
+//                    mModel.end = RecurrenceModel.END_BY_COUNT;
+//
+//                    if (mModel.endCount <= 1) {
+//                        mModel.endCount = 1;
+//                    } else if (mModel.endCount > COUNT_MAX) {
+//                        mModel.endCount = COUNT_MAX;
+//                    }
+//                    updateEndCountText();
+//                    break;
+//            }
+//            mEndCount.setVisibility(mModel.end == RecurrenceModel.END_BY_COUNT ? View.VISIBLE
+//                    : View.GONE);
+//            mEndDateTextView.setVisibility(mModel.end == RecurrenceModel.END_BY_DATE ? View.VISIBLE
+//                    : View.GONE);
+//            mPostEndCount.setVisibility(
+//                    mModel.end == RecurrenceModel.END_BY_COUNT && !mHidePostEndCount ?
+//                            View.VISIBLE : View.GONE);
+//
+//        }
         updateDialog();
     }
 
@@ -1248,6 +1271,13 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                 rrule = mRecurrence.toString();
             }
             mRecurrenceSetListener.onRecurrenceSet(rrule);
+            int idx = 0;
+            for(idx = 0; idx < mWeekByDayButtons.length;idx++){
+                SharedPreferencesUtil.saveBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString(),
+                        ((ToggleButton)mWeekByDayButtons[idx]).isChecked());
+            }
+            SharedPreferencesUtil.saveBoolean(getContext(),SHARED_PREF_KEY_REPEAT,mRepeatSwitch.isChecked());
+
             dismiss();
         }
     }
@@ -1319,8 +1349,8 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             if (mUseFormStrings) {
                 // We'll have to set the layout for the spinner to be weight=0 so it doesn't
                 // take up too much space.
-                mEndSpinner.setLayoutParams(
-                        new TableLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f));
+//                mEndSpinner.setLayoutParams(
+//                        new TableLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f));
             }
         }
 
