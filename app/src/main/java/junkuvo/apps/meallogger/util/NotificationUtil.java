@@ -5,9 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.v7.app.NotificationCompat;
 
+import junkuvo.apps.meallogger.ActivityLogRegister;
 import junkuvo.apps.meallogger.R;
 
 public class NotificationUtil {
@@ -24,7 +24,7 @@ public class NotificationUtil {
         builder.setSmallIcon(R.drawable.ic_add);
 
         // This intent is fired when notification is clicked
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stacktips.com/"));
+        Intent intent = new Intent(context, ActivityLogRegister.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
         // Set the intent that will fire when the user taps the notification.

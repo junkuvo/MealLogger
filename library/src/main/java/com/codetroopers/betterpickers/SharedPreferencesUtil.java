@@ -30,4 +30,16 @@ public class SharedPreferencesUtil {
         return sharedPreferences.getBoolean(key, false);
     }
 
+    public static void saveInt(Context context, String key, int value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(key, value);
+        editor.apply();
+    }
+
+    public static int getInt(Context context, String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getInt(key, 0);
+    }
+
 }

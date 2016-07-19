@@ -7,8 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.widget.Toast;
+
+import com.codetroopers.betterpickers.SharedPreferencesUtil;
+import com.codetroopers.betterpickers.recurrencepicker.RecurrencePickerDialogFragment;
 
 import java.util.Calendar;
 
@@ -86,11 +90,20 @@ public class NotificationService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_ALARM);
         registerReceiver(mReceivedActivity, filter);
 
-        // Set the alarm to start at approximately 2:00 p.m.
+        // 通知時間取得
+        int hour;
+        int minute;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            hour = SharedPreferencesUtil.getInt(mContext, RecurrencePickerDialogFragment.SHARED_PREF_KEY_HOUR);
+            minute = SharedPreferencesUtil.getInt(mContext, RecurrencePickerDialogFragment.SHARED_PREF_KEY_MINUTE);
+        }else{
+            hour = SharedPreferencesUtil.getInt(mContext, RecurrencePickerDialogFragment.SHARED_PREF_KEY_HOUR);
+            minute = SharedPreferencesUtil.getInt(mContext, RecurrencePickerDialogFragment.SHARED_PREF_KEY_MINUTE);
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 24);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         Intent broadCastIntent = new Intent(mContext, ReceivedActivity.class);

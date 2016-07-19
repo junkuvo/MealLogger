@@ -22,7 +22,11 @@ import android.widget.Toast;
 
 import com.codetroopers.betterpickers.recurrencepicker.RecurrencePickerDialogFragment;
 
+import java.util.Date;
+
+import io.realm.Realm;
 import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
+import junkuvo.apps.meallogger.entity.MealLogs;
 import junkuvo.apps.meallogger.service.NotificationService;
 
 public class ActivityLogListAll extends AppCompatActivity
@@ -31,6 +35,7 @@ public class ActivityLogListAll extends AppCompatActivity
     private AlertDialog.Builder mAlertDialog;
 
     private static final String FRAG_TAG_RECUR_PICKER = "recurPicker";
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +52,31 @@ public class ActivityLogListAll extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ActivityLogListAll.this, ActivityLogRegister.class);
-                startActivity(intent);
+//                Intent intent = new Intent(ActivityLogListAll.this, ActivityMealRegister.class);
+//                startActivity(intent);
+                realm = Realm.getDefaultInstance();
+                realm.executeTransactionAsync(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm bgRealm) {
+                        MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
+                        mealLogs.setId(System.currentTimeMillis());
+                        mealLogs.setMenuName("test");
+                        mealLogs.setCreatedAt(new Date(System.currentTimeMillis()));
+                    }
+                }, new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        // トランザクションは成功
+                        Intent intent = new Intent(ActivityLogListAll.this, ActivityLogListAll.class);
+                        startActivity(intent);
+                    }
+                }, new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+                        // トランザクションは失敗。自動的にキャンセルされます
+                    }
+                });
+
             }
         });
 

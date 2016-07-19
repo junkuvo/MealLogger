@@ -74,7 +74,8 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         CalendarDatePickerDialogFragment.OnDateSetListener {
 
     private static final String TAG = "RecurrencePickerDialogFragment";
-    public static final String SHARED_PREF_KEY_RULE = "rule";
+    public static final String SHARED_PREF_KEY_HOUR = "hour";
+    public static final String SHARED_PREF_KEY_MINUTE = "minute";
     public static final String SHARED_PREF_KEY_REPEAT = "repeat";
 
     // in dp's
@@ -933,7 +934,13 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             mWeekByDayButtons[idx].setChecked(SharedPreferencesUtil.getBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString()));
         }
         mRepeatSwitch.setChecked(SharedPreferencesUtil.getBoolean(getContext(),SHARED_PREF_KEY_REPEAT));
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mTimePicker.setHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
+            mTimePicker.setMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
+        }else{
+            mTimePicker.setCurrentHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
+            mTimePicker.setCurrentMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
+        }
     }
 
     private void togglePickerOptions() {
@@ -1277,6 +1284,18 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                         ((ToggleButton)mWeekByDayButtons[idx]).isChecked());
             }
             SharedPreferencesUtil.saveBoolean(getContext(),SHARED_PREF_KEY_REPEAT,mRepeatSwitch.isChecked());
+
+            int hour;
+            int minute;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                hour = mTimePicker.getHour();
+                minute = mTimePicker.getMinute();
+            } else {
+                hour = mTimePicker.getCurrentHour();
+                minute = mTimePicker.getCurrentMinute();
+            }
+            SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_HOUR,hour);
+            SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_MINUTE,minute);
 
             dismiss();
         }
