@@ -13,8 +13,8 @@ public class MealLogs extends RealmObject {
     private Date createdAt;
     private String screenName;
     private String menuName;
-    private String iconUrl;
-    private boolean favorited;
+    private int thumbnailResourceID;
+    private int price;
 
     public MealLogs() {
     }
@@ -51,19 +51,27 @@ public class MealLogs extends RealmObject {
         this.menuName = menuName;
     }
 
-    public String getIconUrl() {
-        return iconUrl;
+    public int getThumbnailResourceID() {
+        return thumbnailResourceID;
     }
 
-    public void setIconUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
+    public void setThumbnailResourceID(int thumbnailResourceID) {
+        this.thumbnailResourceID = thumbnailResourceID;
     }
 
-    public boolean isFavorited() {
-        return favorited;
+    public int getPrice() {
+        return price;
     }
 
-    public void setFavorited(boolean favorited) {
-        this.favorited = favorited;
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, int price){
+        setId(System.currentTimeMillis());
+        setMenuName(menuName);
+        setPrice(price);
+        setThumbnailResourceID(thumbnailResourceID);
+        setCreatedAt(createdAt);
     }
 }

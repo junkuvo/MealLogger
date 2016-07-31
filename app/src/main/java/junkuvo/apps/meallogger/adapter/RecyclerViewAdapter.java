@@ -47,6 +47,8 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         if(mealLogs.getCreatedAt() != null) {
             holder.getTxtMealDate().setText(mDateFormat.format(mealLogs.getCreatedAt()));
         }
+        holder.getImvThumbnail().setImageResource(mealLogs.getThumbnailResourceID());
+        holder.getTxtPrice().setText(String.valueOf(mealLogs.getPrice()));
     }
 
 //    /*

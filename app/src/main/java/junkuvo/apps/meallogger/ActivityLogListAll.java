@@ -2,6 +2,7 @@ package junkuvo.apps.meallogger;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -52,30 +53,40 @@ public class ActivityLogListAll extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(ActivityLogListAll.this, ActivityMealRegister.class);
-//                startActivity(intent);
-                realm = Realm.getDefaultInstance();
-                realm.executeTransactionAsync(new Realm.Transaction() {
+                LayoutInflater inflater = LayoutInflater.from(ActivityLogListAll.this);
+                final View layout;
+                layout = inflater.inflate(R.layout.activity_log_register, (ViewGroup) findViewById(R.id.layout_root));
+                mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
+                mAlertDialog.setTitle(getString(R.string.action_settings));
+                mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
+                mAlertDialog.setView(layout);
+                mAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void execute(Realm bgRealm) {
-                        MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                        mealLogs.setId(System.currentTimeMillis());
-                        mealLogs.setMenuName("test");
-                        mealLogs.setCreatedAt(new Date(System.currentTimeMillis()));
-                    }
-                }, new Realm.Transaction.OnSuccess() {
-                    @Override
-                    public void onSuccess() {
-                        // トランザクションは成功
-                        Intent intent = new Intent(ActivityLogListAll.this, ActivityLogListAll.class);
-                        startActivity(intent);
-                    }
-                }, new Realm.Transaction.OnError() {
-                    @Override
-                    public void onError(Throwable error) {
-                        // トランザクションは失敗。自動的にキャンセルされます
+                    public void onClick(DialogInterface dialog, int which) {
+                        realm = Realm.getDefaultInstance();
+                        realm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm bgRealm) {
+                                // TODO : ここでユーザ入力を登録
+                                MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
+                                mealLogs.setMealLog(R.mipmap.ic_launcher, "test", new Date(System.currentTimeMillis()), 1000);
+                            }
+                        }, new Realm.Transaction.OnSuccess() {
+                            @Override
+                            public void onSuccess() {
+                                // トランザクションは成功
+                            }
+                        }, new Realm.Transaction.OnError() {
+                            @Override
+                            public void onError(Throwable error) {
+                                // トランザクションは失敗。自動的にキャンセルされます
+                            }
+                        });
                     }
                 });
+                mAlertDialog.setNegativeButton("CANCEL", null);
+
+                mAlertDialog.create().show();
 
             }
         });
@@ -109,6 +120,7 @@ public class ActivityLogListAll extends AppCompatActivity
 
         Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
         startService(intent);
+        // TODO : service にする意味あったっけ？？
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
     }
@@ -118,12 +130,12 @@ public class ActivityLogListAll extends AppCompatActivity
 //        // Inflate the menu; this adds items to the action bar if it is present.
 //        getMenuInflater().inflate(R.menu.menu_activity_log_list_all, menu);
 
-        // メニューの要素を追加
-        MenuItem actionItem = menu.add(Menu.NONE, MENU_SETTING_ID, MENU_SETTING_ID, this.getString(R.string.app_name));
-        // SHOW_AS_ACTION_IF_ROOM:余裕があれば表示
-        actionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        // アイコンを設定
-        actionItem.setIcon(R.drawable.ic_access_alarm_white_48dp);
+//        // メニューの要素を追加
+//        MenuItem actionItem = menu.add(Menu.NONE, MENU_SETTING_ID, MENU_SETTING_ID, this.getString(R.string.app_name));
+//        // SHOW_AS_ACTION_IF_ROOM:余裕があれば表示
+//        actionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+//        // アイコンを設定
+//        actionItem.setIcon(R.drawable.ic_access_alarm_white_48dp);
         return true;
     }
 
@@ -137,37 +149,6 @@ public class ActivityLogListAll extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == MENU_SETTING_ID) {
-
-//            FragmentManager fm = getSupportFragmentManager();
-//            Bundle bundle = new Bundle();
-//            Time time = new Time();
-//            time.setToNow();
-//            bundle.putLong(RecurrencePickerDialogFragment.BUNDLE_START_TIME_MILLIS, time.toMillis(false));
-//            bundle.putString(RecurrencePickerDialogFragment.BUNDLE_TIME_ZONE, time.timezone);
-//
-//            // may be more efficient to serialize and pass in EventRecurrence
-//            bundle.putString(RecurrencePickerDialogFragment.BUNDLE_RRULE, null);
-//
-//            RecurrencePickerDialogFragment rpd = (RecurrencePickerDialogFragment) fm.findFragmentByTag(
-//                    FRAG_TAG_RECUR_PICKER);
-//            if (rpd != null) {
-//                rpd.dismiss();
-//            }
-//            rpd = new RecurrencePickerDialogFragment();
-//            rpd.setArguments(bundle);
-//            rpd.setOnRecurrenceSetListener(ActivityLogListAll.this);
-//            rpd.show(fm, FRAG_TAG_RECUR_PICKER);
-//
-
-
-            View layout = inflater.inflate(R.layout.setting_time, (ViewGroup) findViewById(R.id.layout_root));
-            mAlertDialog = new AlertDialog.Builder(this);
-//            mAlertDialog.setTitle(this.getString(R.string.app_name));
-            mAlertDialog.setIcon(R.drawable.ic_access_alarm_white_48dp);
-            mAlertDialog.setView(layout);
-            mAlertDialog.setNegativeButton(this.getString(R.string.app_name), null);
-            mAlertDialog.create().show();
-
             return true;
         }
 

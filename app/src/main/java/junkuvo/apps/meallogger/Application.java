@@ -4,7 +4,6 @@ import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;
-import io.realm.RealmObjectSchema;
 
 public class Application extends android.app.Application {
 
@@ -22,8 +21,6 @@ public class Application extends android.app.Application {
                     @Override
                     public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {
                         if (oldVersion == 0L) {
-                            final RealmObjectSchema tweetSchema = realm.getSchema().get("MealLogs");
-                            tweetSchema.addField("favorited", boolean.class);
                             oldVersion++; }
                     } })
                 .build();

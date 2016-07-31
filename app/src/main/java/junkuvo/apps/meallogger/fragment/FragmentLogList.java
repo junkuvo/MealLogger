@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+
 import java.util.List;
 
+import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
@@ -27,6 +31,7 @@ public class FragmentLogList extends Fragment {
     // RecyclerViewとAdapter
     private RecyclerView mRecyclerView = null;
     private RecyclerViewAdapter mAdapter = null;
+    private OrderedRealmCollection<MealLogs> mItems;
 
     private List<ListRow> mListRows;
     private ListRow mListRow;
@@ -72,10 +77,48 @@ public class FragmentLogList extends Fragment {
 //    }
 
     private void setUpRecyclerView() {
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mRecyclerView.setAdapter(new RecyclerViewAdapter(mContext, realm.where(MealLogs.class).findAllAsync()));
-        mRecyclerView.setHasFixedSize(true);
+        mItems = realm.where(MealLogs.class).findAllAsync();
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+
+        SwipeableRecyclerViewTouchListener swipeTouchListener =
+                new SwipeableRecyclerViewTouchListener(mRecyclerView,
+                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                            @Override
+                            public boolean canSwipeLeft(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public boolean canSwipeRight(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                Log.d("test","tesyt");
+                                for (int position : reverseSortedPositions) {
+                                    mItems.remove(position);
+                                    mAdapter.notifyItemRemoved(position);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                Log.d("test","tesyt");
+                                for (int position : reverseSortedPositions) {
+                                    mItems.remove(position);
+                                    mAdapter.notifyItemRemoved(position);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setAdapter(new RecyclerViewAdapter(mContext, mItems));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
+
     }
 
 }

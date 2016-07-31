@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -19,7 +18,6 @@ import java.util.Calendar;
 import junkuvo.apps.meallogger.receiver.ReceivedActivity;
 
 public class NotificationService extends Service {
-    private static final String ACTION_ALARM = "ALARM";
     private static final String TAG = NotificationService.class.getSimpleName();
     private final NotificationService self = this;
 
@@ -86,10 +84,6 @@ public class NotificationService extends Service {
     private void handleOnStart(Intent intent, int startId) {
 //        startForeground(1, new Notification());
 
-        mReceivedActivity = new ReceivedActivity();
-        IntentFilter filter = new IntentFilter(ACTION_ALARM);
-        registerReceiver(mReceivedActivity, filter);
-
         // 通知時間取得
         int hour;
         int minute;
@@ -106,12 +100,11 @@ public class NotificationService extends Service {
         calendar.set(Calendar.MINUTE, minute);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        Intent broadCastIntent = new Intent(mContext, ReceivedActivity.class);
+        Intent broadCastIntent = new Intent(ReceivedActivity.ACTION_ALARM);
         mAlarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, 0);
 
-        mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent);
-//        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-//                AlarmManager.INTERVAL_DAY, mAlarmIntent);
+//        mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent);
+        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, mAlarmIntent);
     }
 
     public class NotificationBinder extends Binder {
