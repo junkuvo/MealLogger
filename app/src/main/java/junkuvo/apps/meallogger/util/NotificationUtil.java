@@ -33,20 +33,21 @@ public class NotificationUtil {
         builder.setContentIntent(pendingIntent);
 
         // Large icon appears on the left of the notification
-        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_stat));
+        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
 
         // Content title, which appears in large type at the top of the notification
-        builder.setContentTitle("Notifications Title");
+        builder.setContentTitle(context.getString(R.string.app_name));
         builder.setTicker("Ticker！");
 
         // Content text, which appears in smaller text below the title
-        builder.setContentText("Your notification content here.");
+        builder.setContentText("食事の記録をつけましょう！");
 
         // The subtext, which appears under the text on newer devices.
         // This will show-up in the devices with Android 4.2 and above only
         builder.setSubText("Tap to view documentation about notifications.");
 
-        builder.addAction(R.drawable.ic_add, context.getString(R.string.app_name),getPendingIntentWithBroadcast(context, ReceivedActivity.ADD_NOTIFICATION));
+        builder.addAction(R.drawable.ic_add, "前回と同じ",getPendingIntentWithBroadcast(context, ReceivedActivity.ADD_NOTIFICATION));
+        builder.addAction(R.drawable.ic_stat, "入力する",getPendingIntentWithBroadcast(context, ReceivedActivity.ADD_NOTIFICATION));
         builder.setContentIntent(getPendingIntentWithBroadcast(context, ReceivedActivity.CLICK_NOTIFICATION));
         builder.setDeleteIntent(getPendingIntentWithBroadcast(context, ReceivedActivity.DELETE_NOTIFICATION));
 
@@ -54,6 +55,11 @@ public class NotificationUtil {
         builder.setVibrate(pattern);
         // Will display the notification in the notification bar
         notificationManager.notify(R.string.app_name, builder.build());
+    }
+
+    public void cancelNotification(Context context, int id){
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(id);
     }
 
     private PendingIntent getPendingIntentWithBroadcast(Context context, String action) {

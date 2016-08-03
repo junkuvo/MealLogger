@@ -17,8 +17,11 @@
 package com.codetroopers.betterpickers.recurrencepicker;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -1277,7 +1280,6 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                 copyModelToEventRecurrence(mModel, mRecurrence);
                 rrule = mRecurrence.toString();
             }
-            mRecurrenceSetListener.onRecurrenceSet(rrule);
             int idx = 0;
             for(idx = 0; idx < mWeekByDayButtons.length;idx++){
                 SharedPreferencesUtil.saveBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString(),
@@ -1296,6 +1298,9 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             }
             SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_HOUR,hour);
             SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_MINUTE,minute);
+
+            // preferenceに保存した後に下記を実行
+            mRecurrenceSetListener.onRecurrenceSet(rrule);
 
             dismiss();
         }

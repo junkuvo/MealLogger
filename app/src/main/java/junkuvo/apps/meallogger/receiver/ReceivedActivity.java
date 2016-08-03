@@ -1,5 +1,7 @@
 package junkuvo.apps.meallogger.receiver;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import io.realm.Realm;
 import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.entity.MealLogs;
+import junkuvo.apps.meallogger.util.NotificationScheduler;
 import junkuvo.apps.meallogger.util.NotificationUtil;
 
 public class ReceivedActivity extends BroadcastReceiver {
@@ -38,7 +41,7 @@ public class ReceivedActivity extends BroadcastReceiver {
         mContext = context;
         switch (intent.getAction()) {
             case ACTION_ALARM:
-                mNotificationUtil.showTimerDoneNotification(context);
+                mNotificationUtil.showTimerDoneNotification(mContext);
                 Toast.makeText(context, "called ReceivedActivityaaa", Toast.LENGTH_SHORT).show();
                 break;
 
@@ -48,7 +51,8 @@ public class ReceivedActivity extends BroadcastReceiver {
                     @Override
                     public void execute(Realm bgRealm) {
                         MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                        mealLogs.setMealLog(R.mipmap.ic_launcher, "test", new Date(System.currentTimeMillis()), 1000);
+                        // TODO : ここの値どうしよう。。。
+                        mealLogs.setMealLog(R.mipmap.ic_launcher, "from Notification", new Date(System.currentTimeMillis()), "1000");
                     }
                 }, new Realm.Transaction.OnSuccess() {
                     @Override
@@ -62,11 +66,18 @@ public class ReceivedActivity extends BroadcastReceiver {
                         // トランザクションは失敗。自動的にキャンセルされます
                     }
                 });
+                mNotificationUtil.cancelNotification(mContext, R.string.app_name);
                 break;
             case DELETE_NOTIFICATION:
-                break;
             case CLICK_NOTIFICATION:
-                context.startActivity(new Intent(context, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
+                AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+                Intent broadCastIntent = new Intent(ReceivedActivity.ACTION_ALARM);
+                PendingIntent alarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, 0);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, notificationScheduler.createNotifySchedule().getTimeInMillis(), alarmIntent);
+
+                mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                mNotificationUtil.cancelNotification(mContext, R.string.app_name);
                 break;
         }
     }

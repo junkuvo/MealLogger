@@ -14,7 +14,7 @@ public class MealLogs extends RealmObject {
     private String screenName;
     private String menuName;
     private int thumbnailResourceID;
-    private int price;
+    private String price;
 
     public MealLogs() {
     }
@@ -59,15 +59,15 @@ public class MealLogs extends RealmObject {
         this.thumbnailResourceID = thumbnailResourceID;
     }
 
-    public int getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 
-    public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, int price){
+    public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, String price){
         setId(System.currentTimeMillis());
         setMenuName(menuName);
         setPrice(price);

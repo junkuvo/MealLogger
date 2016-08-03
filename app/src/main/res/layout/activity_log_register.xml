@@ -24,6 +24,7 @@
         android:hint="値段"
         android:id="@+id/edtMealPrice"
         android:textSize="24sp"
+        android:inputType="numberDecimal"
         android:layout_below="@+id/edtMealMenu"
         android:layout_centerHorizontal="true" />
 

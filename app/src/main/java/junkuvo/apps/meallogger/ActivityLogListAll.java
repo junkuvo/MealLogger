@@ -1,5 +1,7 @@
 package junkuvo.apps.meallogger;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.codetroopers.betterpickers.recurrencepicker.RecurrencePickerDialogFragment;
@@ -28,7 +31,10 @@ import java.util.Date;
 import io.realm.Realm;
 import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
 import junkuvo.apps.meallogger.entity.MealLogs;
+import junkuvo.apps.meallogger.receiver.ReceivedActivity;
 import junkuvo.apps.meallogger.service.NotificationService;
+import junkuvo.apps.meallogger.util.NotificationScheduler;
+import junkuvo.apps.meallogger.util.NumberTextFormatter;
 
 public class ActivityLogListAll extends AppCompatActivity
         implements RecurrencePickerDialogFragment.OnRecurrenceSetListener{
@@ -37,6 +43,10 @@ public class ActivityLogListAll extends AppCompatActivity
 
     private static final String FRAG_TAG_RECUR_PICKER = "recurPicker";
     private Realm realm;
+
+    private AlarmManager mAlarmManager;
+    private PendingIntent mAlarmIntent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +66,8 @@ public class ActivityLogListAll extends AppCompatActivity
                 LayoutInflater inflater = LayoutInflater.from(ActivityLogListAll.this);
                 final View layout;
                 layout = inflater.inflate(R.layout.activity_log_register, (ViewGroup) findViewById(R.id.layout_root));
+                EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
+                priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
                 mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
                 mAlertDialog.setTitle(getString(R.string.action_settings));
                 mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
@@ -68,8 +80,10 @@ public class ActivityLogListAll extends AppCompatActivity
                             @Override
                             public void execute(Realm bgRealm) {
                                 // TODO : ここでユーザ入力を登録
+                                String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
                                 MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                                mealLogs.setMealLog(R.mipmap.ic_launcher, "test", new Date(System.currentTimeMillis()), 1000);
+                                mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), price);
                             }
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
@@ -106,8 +120,7 @@ public class ActivityLogListAll extends AppCompatActivity
                 // may be more efficient to serialize and pass in EventRecurrence
                 bundle.putString(RecurrencePickerDialogFragment.BUNDLE_RRULE, null);
 
-                RecurrencePickerDialogFragment rpd = (RecurrencePickerDialogFragment) fm.findFragmentByTag(
-                        FRAG_TAG_RECUR_PICKER);
+                RecurrencePickerDialogFragment rpd = (RecurrencePickerDialogFragment) fm.findFragmentByTag(FRAG_TAG_RECUR_PICKER);
                 if (rpd != null) {
                     rpd.dismiss();
                 }
@@ -119,8 +132,9 @@ public class ActivityLogListAll extends AppCompatActivity
         });
 
         Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
+        // アプリのプロセス自体が消えるとアラームが実行されないのでサービスにしておく
+        // 一度設定したアラームはプロセスを消すと消える
         startService(intent);
-        // TODO : service にする意味あったっけ？？
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
     }
@@ -186,5 +200,23 @@ public class ActivityLogListAll extends AppCompatActivity
         Toast.makeText(this, "recuurence called by "
                 + Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
 
+        // Todo : カレンダーの初期値
+        // // TODO: 8/3/16 通知出すかどうかのON/OFF設定
+
+        NotificationScheduler notificationScheduler = new NotificationScheduler(this);
+        mAlarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent broadCastIntent = new Intent(ReceivedActivity.ACTION_ALARM);
+        mAlarmIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, 0);
+
+        mAlarmManager.set(AlarmManager.RTC_WAKEUP, notificationScheduler.createNotifySchedule().getTimeInMillis(), mAlarmIntent);
+
+
+
+        // 通知をOFFにしたとき一応アラーム消す？
+//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//        // ウィジェットが削除されたらアラームを停止する
+//        // メンバ変数ではだめだったのでgetPendingAlarmIntentで取得
+//        PendingIntent sender = getPendingAlarmIntent(context);
+//        am.cancel(sender);
     }
 }
