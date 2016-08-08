@@ -1,5 +1,13 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">メシ録</string>
     <string name="action_settings">Settings</string>
+    <string name="notification_message">食事の記録をつけましょう！</string>
+    <string name="notification_ticker">食事の記録をつける時間です！</string>
+    <string name="notification_subMessage">タップして記録をつけましょう！</string>
+    <string name="notification_addSame">前回と同じ</string>
+    <string name="notification_addNew">新しく入力</string>
 
- </resources>
+    <string name="dialog_title">削除</string>
+    <string name="dialog_message">この記録を削除してよろしいですか？</string>
+
+</resources>

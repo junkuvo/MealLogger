@@ -3,14 +3,12 @@ package junkuvo.apps.meallogger.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
 import java.util.List;
 
@@ -27,6 +25,8 @@ public class FragmentLogList extends Fragment {
     private Context mContext = null;
     private View mView;
     private RecyclerFragmentListener mFragmentListener = null;
+
+    private AlertDialog.Builder mAlertDialog;
 
     // RecyclerViewとAdapter
     private RecyclerView mRecyclerView = null;
@@ -79,45 +79,10 @@ public class FragmentLogList extends Fragment {
     private void setUpRecyclerView() {
         mItems = realm.where(MealLogs.class).findAllAsync();
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-
-        SwipeableRecyclerViewTouchListener swipeTouchListener =
-                new SwipeableRecyclerViewTouchListener(mRecyclerView,
-                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
-                            @Override
-                            public boolean canSwipeLeft(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public boolean canSwipeRight(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                Log.d("test","tesyt");
-                                for (int position : reverseSortedPositions) {
-                                    mItems.remove(position);
-                                    mAdapter.notifyItemRemoved(position);
-                                }
-                                mAdapter.notifyDataSetChanged();
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                Log.d("test","tesyt");
-                                for (int position : reverseSortedPositions) {
-                                    mItems.remove(position);
-                                    mAdapter.notifyItemRemoved(position);
-                                }
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-
+        mAdapter = new RecyclerViewAdapter(mContext, mItems);//new CardViewAdapter(mItems, itemTouchListener);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mRecyclerView.setAdapter(new RecyclerViewAdapter(mContext, mItems));
+        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
 
     }
 

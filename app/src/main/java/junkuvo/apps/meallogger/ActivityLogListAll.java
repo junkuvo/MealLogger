@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.codetroopers.betterpickers.SharedPreferencesUtil;
 import com.codetroopers.betterpickers.recurrencepicker.RecurrencePickerDialogFragment;
 
 import java.util.Date;
@@ -39,6 +40,10 @@ import junkuvo.apps.meallogger.util.NumberTextFormatter;
 public class ActivityLogListAll extends AppCompatActivity
         implements RecurrencePickerDialogFragment.OnRecurrenceSetListener{
 
+    public static final String PREF_KEY_MEAL_NAME = "mealName";
+    public static final String PREF_KEY_MEAL_PRICE = "mealPrice";
+
+
     private AlertDialog.Builder mAlertDialog;
 
     private static final String FRAG_TAG_RECUR_PICKER = "recurPicker";
@@ -46,7 +51,6 @@ public class ActivityLogListAll extends AppCompatActivity
 
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +67,10 @@ public class ActivityLogListAll extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Intent intent = new Intent(ActivityLogListAll.this, ActivityLogRegister.class);
+                startActivity(intent);
+
                 LayoutInflater inflater = LayoutInflater.from(ActivityLogListAll.this);
                 final View layout;
                 layout = inflater.inflate(R.layout.activity_log_register, (ViewGroup) findViewById(R.id.layout_root));
@@ -89,6 +97,10 @@ public class ActivityLogListAll extends AppCompatActivity
                             @Override
                             public void onSuccess() {
                                 // トランザクションは成功
+                                String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                                SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_NAME,menuName);
+                                SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_PRICE,price);
                             }
                         }, new Realm.Transaction.OnError() {
                             @Override

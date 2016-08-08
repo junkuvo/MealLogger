@@ -1,6 +1,7 @@
 package junkuvo.apps.meallogger.service;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -9,7 +10,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.receiver.ReceivedActivity;
+import junkuvo.apps.meallogger.util.NotificationUtil;
 
 public class NotificationService extends Service {
     private static final String TAG = NotificationService.class.getSimpleName();
@@ -63,6 +66,13 @@ public class NotificationService extends Service {
     public IBinder onBind(Intent intent) {
         Toast.makeText(mContext, "onBind called by "
                 + Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationUtil notificationUtil = new NotificationUtil();
+//        notificationManager.notify(R.string.app_name, notificationUtil.createNotification(this));
+
+        startForeground(R.string.app_name, notificationUtil.createNotification(this));
+
         return new NotificationBinder();
     }
 

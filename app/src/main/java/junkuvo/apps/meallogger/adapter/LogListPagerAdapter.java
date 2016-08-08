@@ -8,7 +8,7 @@ import junkuvo.apps.meallogger.fragment.FragmentLogList;
 
 public class LogListPagerAdapter extends FragmentPagerAdapter {
 
-    private static final int PAGE_NUMBER = 1;
+    private static final int PAGE_NUMBER = 2;
 
     public LogListPagerAdapter(FragmentManager fm) {
         super(fm);

@@ -1,5 +1,6 @@
 package junkuvo.apps.meallogger.view;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,17 +12,30 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ListRowViewHolder.class.getSimpleName();
     private final ListRowViewHolder self = this;
 
+    private Context mContext;
+
     protected ImageView imvThumbnail;
     protected TextView txtMealMenu;
     protected TextView txtMealDate;
     protected TextView txtPrice;
+    protected TextView txtId;
 
-    public ListRowViewHolder(View view) {
+    public ListRowViewHolder(Context context, View view) {
         super(view);
+        mContext = context;
         this.imvThumbnail = (ImageView) view.findViewById(R.id.imvThumbnail);
         this.txtMealMenu = (TextView) view.findViewById(R.id.txtMealMenu);
         this.txtMealDate = (TextView) view.findViewById(R.id.txtMealDate);
         this.txtPrice = (TextView) view.findViewById(R.id.txtPrice);
+        this.txtId = (TextView)view.findViewById(R.id.txtId);
+    }
+
+    public TextView getTxtId() {
+        return txtId;
+    }
+
+    public void setTxtId(TextView txtId) {
+        this.txtId = txtId;
     }
 
     public ImageView getImvThumbnail() {
