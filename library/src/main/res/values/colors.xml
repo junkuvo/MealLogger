@@ -29,6 +29,7 @@
     <color name="bpBlue_focused">#c1e8f7</color>
     <color name="bpDarker_blue">#0099cc</color>
     <color name="bp_disabled_day">#f44336</color>
+    <color name="bpDarkerBlue">#1111ff</color>
 
 
     <color name="neutral_pressed">#33999999</color>
