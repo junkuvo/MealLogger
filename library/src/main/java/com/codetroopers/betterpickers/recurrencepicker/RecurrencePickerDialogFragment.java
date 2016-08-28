@@ -17,11 +17,7 @@
 package com.codetroopers.betterpickers.recurrencepicker;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.Application;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -29,7 +25,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.SwitchCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -43,7 +38,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -55,8 +49,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -350,6 +342,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
     public static final String BUNDLE_TIME_ZONE = "bundle_event_time_zone";
     public static final String BUNDLE_RRULE = "bundle_event_rrule";
     public static final String BUNDLE_HIDE_SWITCH_BUTTON = "bundle_hide_switch_button";
+    public static final String BUNDLE_TITLE = "bundle_title";
 
     private static final String BUNDLE_MODEL = "bundle_model";
     private static final String BUNDLE_END_COUNT_HAS_FOCUS = "bundle_end_count_has_focus";
@@ -360,6 +353,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
     private WeekButton mRepeatSwitch;
 
     private TimePicker mTimePicker;
+    private EditText mEdtTitle;
 
     private EditText mInterval;
     private TextView mIntervalPreText;
@@ -671,12 +665,34 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         }
     }
 
+    public interface OnOkBtnClickListener {
+        public void onOkClicked(View view);
+    }
+
+    private OnOkBtnClickListener mListenerOk;
+
+    public void setOnOkBtnClickListener(OnOkBtnClickListener l) {
+        mListenerOk = l;
+    }
+
+    public interface OnCancelBtnClickListener {
+        public void onCancelClicked();
+    }
+
+    private OnCancelBtnClickListener mListenerCancel;
+
+    public void setOnCancelBtnClickListener(OnCancelBtnClickListener l) {
+        mListenerCancel = l;
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRecurrence.wkst = EventRecurrence.timeDay2Day(Utils.getFirstDayOfWeek(getActivity()));
 
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
+        String title = null;
         boolean endCountHasFocus = false;
         if (savedInstanceState != null) {
             RecurrenceModel m = (RecurrenceModel) savedInstanceState.get(BUNDLE_MODEL);
@@ -709,6 +725,8 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                 }
 
                 mModel.forceHideSwitchButton = bundle.getBoolean(BUNDLE_HIDE_SWITCH_BUTTON, false);
+
+                title = bundle.getString(BUNDLE_TITLE);
             } else {
                 mTime.setToNow();
             }
@@ -738,14 +756,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             });
         }
         mTimePicker = (TimePicker)mView.findViewById(R.id.timePicker);
-
-//        mFreqSpinner = (Spinner) mView.findViewById(R.id.freqSpinner);
-//        mFreqSpinner.setOnItemSelectedListener(this);
-//        ArrayAdapter<CharSequence> freqAdapter = ArrayAdapter.createFromResource(getActivity(),
-//                R.array.recurrence_freq, R.layout.recurrencepicker_freq_item);
-//        freqAdapter.setDropDownViewResource(R.layout.recurrencepicker_freq_item);
-//        mFreqSpinner.setAdapter(freqAdapter);
-
+        mEdtTitle = (EditText)mView.findViewById(R.id.txtTitle);
         mInterval = (EditText) mView.findViewById(R.id.interval);
         mInterval.addTextChangedListener(new minMaxTextWatcher(1, INTERVAL_DEFAULT, INTERVAL_MAX) {
             @Override
@@ -912,13 +923,17 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
         mDoneButton = (Button) mView.findViewById(R.id.done_button);
         mDoneButton.setOnClickListener(this);
-        setDialogStatus();
+        setDialogStatus(title);
 
         Button cancelButton = (Button) mView.findViewById(R.id.cancel_button);
         //FIXME no text color for this one ?
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mListenerCancel != null) {
+                    mListenerCancel.onCancelClicked();
+                }
+
                 dismiss();
             }
         });
@@ -931,19 +946,21 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         return mView;
     }
 
-    private void setDialogStatus(){
-        int idx;
-        for (idx = 0; idx < mWeekByDayButtons.length; idx++){
-            mWeekByDayButtons[idx].setChecked(SharedPreferencesUtil.getBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString()));
-        }
-        mRepeatSwitch.setChecked(SharedPreferencesUtil.getBoolean(getContext(),SHARED_PREF_KEY_REPEAT));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mTimePicker.setHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
-            mTimePicker.setMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
-        }else{
-            mTimePicker.setCurrentHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
-            mTimePicker.setCurrentMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
-        }
+    private void setDialogStatus(String title){
+//        int idx;
+//        for (idx = 0; idx < mWeekByDayButtons.length; idx++){
+//            mWeekByDayButtons[idx].setChecked(SharedPreferencesUtil.getBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString()));
+//        }
+//
+//        mRepeatSwitch.setChecked(SharedPreferencesUtil.getBoolean(getContext(),SHARED_PREF_KEY_REPEAT));
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            mTimePicker.setHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
+//            mTimePicker.setMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
+//        }else{
+//            mTimePicker.setCurrentHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
+//            mTimePicker.setCurrentMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
+//        }
+        mEdtTitle.setText(title);
     }
 
     private void togglePickerOptions() {
@@ -1300,7 +1317,13 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
             SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_MINUTE,minute);
 
             // preferenceに保存した後に下記を実行
-            mRecurrenceSetListener.onRecurrenceSet(rrule);
+            if(mRecurrenceSetListener != null) {
+                mRecurrenceSetListener.onRecurrenceSet(rrule);
+            }
+
+            if (mListenerOk != null) {
+                mListenerOk.onOkClicked(mView);
+            }
 
             dismiss();
         }

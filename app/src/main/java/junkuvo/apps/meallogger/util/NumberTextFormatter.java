@@ -20,7 +20,7 @@ public class NumberTextFormatter implements TextWatcher{
         public NumberTextFormatter(EditText editText, String pattern) {
             df = new DecimalFormat(pattern);
             df.setDecimalSeparatorAlwaysShown(true);
-            dfnd = new DecimalFormat("#,###.00");
+            dfnd = new DecimalFormat(pattern);
             this.et = editText;
             hasFractionalPart = false;
         }
@@ -33,7 +33,7 @@ public class NumberTextFormatter implements TextWatcher{
                 try {
                     int inilen, endlen;
                     inilen = et.getText().length();
-                    String v = s.toString().replace(String.valueOf(df.getDecimalFormatSymbols().getGroupingSeparator()), "").replace("$","");
+                    String v = s.toString().replace(String.valueOf(df.getDecimalFormatSymbols().getGroupingSeparator()), "").replace("¥","");
                     Number n = df.parse(v);
                     int cp = et.getSelectionStart();
                     if (hasFractionalPart) {
@@ -44,13 +44,11 @@ public class NumberTextFormatter implements TextWatcher{
                     } else {
                         et.setText(dfnd.format(n));
                     }
-                    et.setText("$".concat(et.getText().toString()));
+                    et.setText("¥".concat(et.getText().toString()));
                     endlen = et.getText().length();
                     int sel = (cp + (endlen - inilen));
                     if (sel > 0 && sel < et.getText().length()) {
                         et.setSelection(sel);
-                    } else if (trailingZeroCount > -1) {
-                        et.setSelection(et.getText().length() - 3);
                     } else {
                         et.setSelection(et.getText().length());
                     }

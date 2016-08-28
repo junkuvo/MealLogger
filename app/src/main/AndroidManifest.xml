@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="junkuvo.apps.meallogger">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:name=".Application"
         android:allowBackup="true"
@@ -25,7 +28,7 @@
             android:name=".service.NotificationService"
             android:enabled="true" />
 
-        <receiver android:name=".receiver.ReceivedActivity">
+        <receiver android:name=".receiver.NotificationEventReceiver">
             <intent-filter>
                 <!--定義したactionを追記する-->
                 <action android:name="ALARM" />

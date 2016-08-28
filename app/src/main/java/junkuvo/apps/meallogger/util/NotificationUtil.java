@@ -11,7 +11,7 @@ import android.support.v7.app.NotificationCompat;
 import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.ActivityLogRegister;
 import junkuvo.apps.meallogger.R;
-import junkuvo.apps.meallogger.receiver.ReceivedActivity;
+import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 
 public class NotificationUtil {
     private static final String TAG = NotificationUtil.class.getSimpleName();
@@ -50,11 +50,11 @@ public class NotificationUtil {
 
         if(SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME) != null
                 && SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE) != null) {
-            builder.addAction(R.drawable.ic_stat_add, context.getString(R.string.notification_addSame), getPendingIntentWithBroadcast(context, ReceivedActivity.ADD_NOTIFICATION));
+            builder.addAction(R.drawable.ic_stat_add, context.getString(R.string.notification_addSame), getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
         }
-        builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew),getPendingIntentWithBroadcast(context, ReceivedActivity.ADD_NOTIFICATION));
-        builder.setContentIntent(getPendingIntentWithBroadcast(context, ReceivedActivity.CLICK_NOTIFICATION));
-        builder.setDeleteIntent(getPendingIntentWithBroadcast(context, ReceivedActivity.DELETE_NOTIFICATION));
+        builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew),getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
+        builder.setContentIntent(getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
+        builder.setDeleteIntent(getPendingIntentWithBroadcast(context, NotificationEventReceiver.DELETE_NOTIFICATION));
 
         long[] pattern = {100, 100, 100, 100}; // OFF/ON/OFF/ON...
         builder.setVibrate(pattern);

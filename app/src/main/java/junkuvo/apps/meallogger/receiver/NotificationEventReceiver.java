@@ -17,9 +17,9 @@ import junkuvo.apps.meallogger.util.NotificationScheduler;
 import junkuvo.apps.meallogger.util.NotificationUtil;
 import junkuvo.apps.meallogger.util.SharedPreferencesUtil;
 
-public class ReceivedActivity extends BroadcastReceiver {
-    private static final String TAG = ReceivedActivity.class.getSimpleName();
-    private final ReceivedActivity self = this;
+public class NotificationEventReceiver extends BroadcastReceiver {
+    private static final String TAG = NotificationEventReceiver.class.getSimpleName();
+    private final NotificationEventReceiver self = this;
 
     private Realm realm;
 
@@ -33,7 +33,7 @@ public class ReceivedActivity extends BroadcastReceiver {
     private NotificationUtil mNotificationUtil;
 
 
-    public ReceivedActivity() {
+    public NotificationEventReceiver() {
         mNotificationUtil = new NotificationUtil();
     }
 
@@ -76,9 +76,9 @@ public class ReceivedActivity extends BroadcastReceiver {
                 // 次回のアラームを設定　Fixme:これは通知を出したタイミングがいいのでは？
                 NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
                 AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-                Intent broadCastIntent = new Intent(ReceivedActivity.ACTION_ALARM);
+                Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
                 PendingIntent alarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, 0);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, notificationScheduler.createNotifySchedule().getTimeInMillis(), alarmIntent);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, notificationScheduler.createNextNotifySchedule().getTimeInMillis(), alarmIntent);
 
                 mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 mNotificationUtil.cancelNotification(mContext, R.string.app_name);

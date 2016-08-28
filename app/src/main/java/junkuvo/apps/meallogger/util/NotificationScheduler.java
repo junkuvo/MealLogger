@@ -19,7 +19,7 @@ public class NotificationScheduler {
         this.mContext = mContext;
     }
 
-    public Calendar createNotifySchedule(){
+    public Calendar createNextNotifySchedule(){
         // 通知時間取得
         int hour;
         int minute;

@@ -10,14 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.List;
-
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
 import junkuvo.apps.meallogger.entity.MealLogs;
-import junkuvo.apps.meallogger.view.ListRow;
 
 public class FragmentLogList extends Fragment {
     private Realm realm;
@@ -32,9 +29,6 @@ public class FragmentLogList extends Fragment {
     private RecyclerView mRecyclerView = null;
     private RecyclerViewAdapter mAdapter = null;
     private OrderedRealmCollection<MealLogs> mItems;
-
-    private List<ListRow> mListRows;
-    private ListRow mListRow;
 
     public interface RecyclerFragmentListener {
         void onRecyclerEvent();

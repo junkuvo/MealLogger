@@ -25,6 +25,7 @@
         android:layout_height="match_parent"
         android:background="@color/recurrence_picker_background"
         android:orientation="vertical"
+        android:id="@+id/recurrencePickerDialog"
         android:padding="0dp">
 
         <ScrollView
@@ -49,27 +50,6 @@
                     android:paddingRight="12dip"
                     android:paddingTop="12dip">
 
-                    <!--<Spinner-->
-                        <!--android:id="@+id/freqSpinner"-->
-                        <!--style="@style/TextAppearance.RecurrencePickerStyle"-->
-                        <!--android:layout_width="0dp"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="center_horizontal"-->
-                        <!--android:layout_weight="1"-->
-                        <!--android:background="@drawable/spinner_background_holo_light"-->
-                        <!--android:dropDownSelector="@drawable/item_background_holo_light"-->
-                        <!--android:entries="@array/recurrence_freq"-->
-                        <!--android:gravity="left"-->
-                        <!--android:padding="0dp" />-->
-
-                    <!--<android.support.v7.widget.SwitchCompat-->
-                        <!--android:id="@+id/repeat_switch"-->
-                        <!--style="@style/Widget.Holo.Light.CompoundButton.Switch"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="center_vertical"-->
-                        <!--android:layout_marginLeft="4dp" />-->
-
                     <com.codetroopers.betterpickers.recurrencepicker.WeekButton
                         android:id="@+id/repeat_switch"
                         style="@style/RecurrenceDayOfWeekStyle"
@@ -77,6 +57,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="4dp" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:hint="通知タイトル"
+                        android:text=""
+                        android:layout_gravity="center"
+                        android:id="@+id/txtTitle" />
 
                 </LinearLayout>
 
@@ -272,7 +261,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/timePicker"
-                    android:layout_below="@+id/txtSensitivityTitle"
                     android:layout_centerHorizontal="true" />
             </LinearLayout>
         </ScrollView>

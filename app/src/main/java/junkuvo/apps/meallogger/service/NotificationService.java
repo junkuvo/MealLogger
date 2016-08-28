@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import junkuvo.apps.meallogger.R;
-import junkuvo.apps.meallogger.receiver.ReceivedActivity;
+import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.util.NotificationUtil;
 
 public class NotificationService extends Service {
@@ -21,7 +21,7 @@ public class NotificationService extends Service {
     private Context mContext;
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
-    private ReceivedActivity mReceivedActivity;
+    private NotificationEventReceiver mNotificationEventReceiver;
 
     @Override
     public void onCreate() {
@@ -56,8 +56,8 @@ public class NotificationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mReceivedActivity != null) {
-            unregisterReceiver(mReceivedActivity);
+        if(mNotificationEventReceiver != null) {
+            unregisterReceiver(mNotificationEventReceiver);
         }
     }
 
