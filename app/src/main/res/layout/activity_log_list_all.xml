@@ -38,6 +38,14 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
+    <junkuvo.apps.meallogger.view.EllipseTextView
+        android:id="@+id/txtSumPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:layout_margin="@dimen/sumprice_margin"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_setting"
         android:layout_width="wrap_content"

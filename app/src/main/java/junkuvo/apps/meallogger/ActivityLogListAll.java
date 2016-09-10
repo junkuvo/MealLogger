@@ -1,5 +1,6 @@
 package junkuvo.apps.meallogger;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -24,6 +25,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
@@ -33,6 +36,7 @@ import android.widget.ToggleButton;
 import com.codetroopers.betterpickers.SharedPreferencesUtil;
 import com.codetroopers.betterpickers.recurrencepicker.RecurrencePickerDialogFragment;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.OrderedRealmCollection;
@@ -40,17 +44,20 @@ import io.realm.Realm;
 import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
 import junkuvo.apps.meallogger.adapter.NotificationRecyclerViewAdapter;
 import junkuvo.apps.meallogger.entity.MealLogs;
-import junkuvo.apps.meallogger.entity.NotificationTimes;
+import junkuvo.apps.meallogger.entity.NotificationTime;
 import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.service.NotificationService;
 import junkuvo.apps.meallogger.util.NotificationScheduler;
 import junkuvo.apps.meallogger.util.NumberTextFormatter;
+import junkuvo.apps.meallogger.util.PriceUtil;
+import junkuvo.apps.meallogger.view.EllipseTextView;
 
 public class ActivityLogListAll extends AppCompatActivity
         implements RecurrencePickerDialogFragment.OnRecurrenceSetListener{
 
     public static final String PREF_KEY_MEAL_NAME = "mealName";
     public static final String PREF_KEY_MEAL_PRICE = "mealPrice";
+    public static final String INTENT_KEY_NOTIFICATION_NAME = "notificationScheduleName";
 
 
     private AlertDialog.Builder mAlertDialog;
@@ -60,6 +67,7 @@ public class ActivityLogListAll extends AppCompatActivity
 
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
+    private EllipseTextView mEllipseTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +76,10 @@ public class ActivityLogListAll extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mEllipseTextView = (EllipseTextView)findViewById(R.id.txtSumPrice);
+
         final ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new LogListPagerAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new LogListPagerAdapter(getSupportFragmentManager(),this));
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
@@ -78,7 +88,12 @@ public class ActivityLogListAll extends AppCompatActivity
             public void onClick(View view) {
                 LayoutInflater inflater = LayoutInflater.from(ActivityLogListAll.this);
                 final View layout;
-                layout = inflater.inflate(R.layout.activity_log_register, (ViewGroup) findViewById(R.id.layout_root));
+                layout = inflater.inflate(R.layout.dialog_log_register, (ViewGroup) findViewById(R.id.layout_root));
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityLogListAll.this, android.R.layout.simple_dropdown_item_1line, MENUS);
+                AutoCompleteTextView textView = (AutoCompleteTextView)layout.findViewById(R.id.edtMealMenu);
+                textView.setAdapter(adapter);
+
                 EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
                 priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
                 mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
@@ -93,11 +108,10 @@ public class ActivityLogListAll extends AppCompatActivity
                         realm.executeTransactionAsync(new Realm.Transaction() {
                             @Override
                             public void execute(Realm bgRealm) {
-                                // TODO : ここでユーザ入力を登録
                                 String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
                                 String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
                                 MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                                mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), price);
+                                mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price,"¥"));
                             }
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
@@ -105,6 +119,7 @@ public class ActivityLogListAll extends AppCompatActivity
                                 // トランザクションは成功
                                 String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
                                 String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                                // TODO : 修正の場合もこれ ＋ 通知IDで各通知と紐付ける
                                 SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_NAME,menuName);
                                 SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_PRICE,price);
                             }
@@ -112,12 +127,12 @@ public class ActivityLogListAll extends AppCompatActivity
                             @Override
                             public void onError(Throwable error) {
                                 // トランザクションは失敗。自動的にキャンセルされます
+                                error.printStackTrace();
                             }
                         });
                     }
                 });
                 mAlertDialog.setNegativeButton(getString(R.string.dialog_log_cancel), null);
-
                 mAlertDialog.create().show();
             }
         });
@@ -131,14 +146,29 @@ public class ActivityLogListAll extends AppCompatActivity
             }
         });
 
+        EllipseTextView ellipseTextView = (EllipseTextView) findViewById(R.id.txtSumPrice);
+        ellipseTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), ((EllipseTextView)v).getText(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        setNotification();
+
         Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
+        intent.putExtra(INTENT_KEY_NOTIFICATION_NAME, ((Application)getApplication()).mNotificationScheduleName);
         // アプリのプロセス自体が消えるとアラームが実行されないのでサービスにしておく
         // 一度設定したアラームはプロセスを消すと消える
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-
     }
-    private FragmentManager mFragmentManager;
+
+
+    // TODO : これをrealmのヒストリーから取れるようにしたいなぁ
+    private static final String[] MENUS = new String[] {
+            "ランチ", "夕食", "昼食", "大戸屋", "ご飯"
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -200,17 +230,6 @@ public class ActivityLogListAll extends AppCompatActivity
     public void onRecurrenceSet(String rrule) {
         Toast.makeText(this, "recurrence called by "
                 + Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
-
-        // Todo : カレンダーの初期値
-        // // TODO: 8/3/16 通知出すかどうかのON/OFF設定
-
-        NotificationScheduler notificationScheduler = new NotificationScheduler(this);
-        mAlarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
-        mAlarmIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, 0);
-
-        mAlarmManager.set(AlarmManager.RTC_WAKEUP, notificationScheduler.createNextNotifySchedule().getTimeInMillis(), mAlarmIntent);
-
     }
 
     public void showScheduleDialog(){
@@ -230,6 +249,7 @@ public class ActivityLogListAll extends AppCompatActivity
         }
         rpd = new RecurrencePickerDialogFragment();
         rpd.setArguments(bundle);
+        // 新規追加
         rpd.setOnOkBtnClickListener(new RecurrencePickerDialogFragment.OnOkBtnClickListener() {
             @Override
             public void onOkClicked(final View view) {
@@ -238,7 +258,7 @@ public class ActivityLogListAll extends AppCompatActivity
                     @Override
                     public void execute(Realm bgRealm) {
                         // TODO : ここでユーザ入力を登録
-                        String notifiationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtTitle)).getText().toString();
+                        String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtTitle)).getText().toString();
                         int hour;
                         int minute;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -248,23 +268,23 @@ public class ActivityLogListAll extends AppCompatActivity
                             hour = ((TimePicker)view.findViewById(com.codetroopers.betterpickers.R.id.timePicker)).getCurrentHour();
                             minute = ((TimePicker)view.findViewById(com.codetroopers.betterpickers.R.id.timePicker)).getCurrentMinute();
                         }
-                        String notificationTime = String.valueOf(hour) + ":" + String.valueOf(minute);
+                        String hourStr = String.valueOf(hour).length() == 1 ? "0" + String.valueOf(hour) : String.valueOf(hour);
+                        String minuteStr = String.valueOf(minute).length() == 1 ? "0" + String.valueOf(minute) : String.valueOf(minute);
+                        String notificationHour = hourStr + ":" + minuteStr;
                         StringBuilder sb = new StringBuilder();
                         ToggleButton toggleButton;
                         for(int i = 0; i < 7;i++) {
                             toggleButton = (ToggleButton) ((LinearLayout) view.findViewById(com.codetroopers.betterpickers.R.id.weekGroup)).getChildAt(i);
                             sb.append(toggleButton.isChecked() ? toggleButton.getTextOn() : "");
                         }
-
-//                        SharedPreferencesUtil.saveBoolean(getContext(),SHARED_PREF_KEY_REPEAT,mRepeatSwitch.isChecked());
-
-                        NotificationTimes notificationTimes = bgRealm.createObject(NotificationTimes.class);
-                        notificationTimes.setNotificationTime(notifiationTitle, notificationTime, sb.toString());
+                        NotificationTime notificationTime = bgRealm.createObject(NotificationTime.class);
+                        notificationTime.setNotificationTime(notificationTitle, notificationHour, sb.toString());
                     }
                 }, new Realm.Transaction.OnSuccess() {
                     @Override
                     public void onSuccess() {
                         showNotificationScheduleDialog();
+                        setNotification();
                     }
                 }, new Realm.Transaction.OnError() {
                     @Override
@@ -293,23 +313,36 @@ public class ActivityLogListAll extends AppCompatActivity
         mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
         mAlertDialog.setTitle(getString(R.string.dialog_scheduler_title));
         // TODO : いい感じのアイコン作成
-        mAlertDialog.setIcon(R.drawable.ic_add_alarm_white_48dp);
+        mAlertDialog.setIcon(R.drawable.ic_alarm_black_48dp);
         mAlertDialog.setMessage(getString(R.string.dialog_scheduler_message));
         RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(ActivityLogListAll.this));
         realm = Realm.getDefaultInstance();
-        OrderedRealmCollection<NotificationTimes> times = realm.where(NotificationTimes.class).findAllAsync();
+        OrderedRealmCollection<NotificationTime> times = realm.where(NotificationTime.class).findAllAsync();
         NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(ActivityLogListAll.this,times,fm);
         recyclerView.setAdapter(adapter);
         mAlertDialog.setView(layout);
-        mAlertDialog.setPositiveButton(getString(R.string.dialog_time_create), new DialogInterface.OnClickListener() {
+        mAlertDialog.setPositiveButton(getString(R.string.dialog_time_cancel), null);
+        mAlertDialog.setNegativeButton(getString(R.string.dialog_time_create), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 showScheduleDialog();
             }
         });
-        mAlertDialog.setNegativeButton(getString(R.string.dialog_time_cancel), null);
         mAlertDialog.create().show();
 
+    }
+
+    public void setNotification(){
+        if(mAlarmIntent != null) {
+            mAlarmManager.cancel(mAlarmIntent);
+        }
+        NotificationScheduler notificationScheduler = new NotificationScheduler(this);
+        Calendar calendar = notificationScheduler.createNextNotifySchedule();
+        mAlarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
+        broadCastIntent.putExtra(INTENT_KEY_NOTIFICATION_NAME, ((Application)getApplication()).mNotificationScheduleName);
+        mAlarmIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent);
     }
 }

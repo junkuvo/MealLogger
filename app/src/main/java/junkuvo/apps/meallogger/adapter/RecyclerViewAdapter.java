@@ -6,17 +6,21 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.codetroopers.betterpickers.SharedPreferencesUtil;
 
 import java.text.SimpleDateFormat;
 
-import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
+import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.entity.MealLogs;
+import junkuvo.apps.meallogger.util.NumberTextFormatter;
+import junkuvo.apps.meallogger.util.PriceUtil;
 import junkuvo.apps.meallogger.view.ListRowViewHolder;
 
 public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, ListRowViewHolder> {
@@ -24,13 +28,13 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
     private final RecyclerViewAdapter self = this;
 
     private Context mContext;
-    private final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
+    private final String DATE_FORMAT = "yyyy/MM/dd HH:mm";
     private SimpleDateFormat mDateFormat;
 
     private Realm realm;
     private AlertDialog.Builder mAlertDialog;
 
-    public RecyclerViewAdapter(Context context, OrderedRealmCollection<MealLogs> data) {
+    public RecyclerViewAdapter(Context context, RealmResults<MealLogs> data) {
         super(context ,data, true);
         this.mContext = context;
 
@@ -49,8 +53,58 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                // item clicked
-                        Toast.makeText(mContext,"test", Toast.LENGTH_SHORT).show();
+                final long id = Long.parseLong(((TextView)v.findViewById(R.id.txtId)).getText().toString());
+                String mealMenu = ((TextView) v.findViewById(R.id.txtMealMenu)).getText().toString();
+                String mealPrice = ((TextView) v.findViewById(R.id.txtPrice)).getText().toString();
+
+                LayoutInflater inflater = LayoutInflater.from(mContext);
+                final View layout;
+                layout = inflater.inflate(R.layout.dialog_log_register, null);
+                EditText edtMealMenu = (EditText) layout.findViewById(R.id.edtMealMenu);
+                edtMealMenu.setText(mealMenu);
+                EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
+                priceText.setText(mealPrice);
+                priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
+                mAlertDialog = new AlertDialog.Builder(mContext);
+                mAlertDialog.setTitle(mContext.getString(R.string.dialog_register_update_title));
+                // TODO : いい感じのアイコン作成
+                mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
+                mAlertDialog.setView(layout);
+                mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_log_create), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, int which) {
+                        realm = Realm.getDefaultInstance();
+                        realm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm bgRealm) {
+                                final RealmResults<MealLogs> result =
+                                        bgRealm.where(MealLogs.class)
+                                                .equalTo("id", id)
+                                                .findAll();
+
+                                // TODO : これはUtilクラスに移殖
+                                String mealMenu = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                String mealPrice = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
+
+                                result.get(0).setMenuName(mealMenu);
+                                result.get(0).setPrice(PriceUtil.parsePriceToLong(mealPrice,"¥"));
+                                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME,mealMenu);
+                                SharedPreferencesUtil.saveString(mContext,ActivityLogListAll.PREF_KEY_MEAL_PRICE,mealPrice);
+                            }
+                        }, new Realm.Transaction.OnSuccess() {
+                            @Override
+                            public void onSuccess() {
+                            }
+                        }, new Realm.Transaction.OnError() {
+                            @Override
+                            public void onError(Throwable error) {
+                                error.printStackTrace();
+                            }
+                        });
+                    }
+                });
+                mAlertDialog.setNegativeButton(mContext.getString(R.string.dialog_log_cancel), null);
+                mAlertDialog.create().show();
             }
         });
 
@@ -107,7 +161,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
             holder.getTxtMealDate().setText(mDateFormat.format(mealLogs.getCreatedAt()));
         }
         holder.getImvThumbnail().setImageResource(mealLogs.getThumbnailResourceID());
-        holder.getTxtPrice().setText(String.valueOf(mealLogs.getPrice()));
+        holder.getTxtPrice().setText(PriceUtil.parseLongToPrice(mealLogs.getPrice(),"¥"));
         holder.getTxtId().setText(String.valueOf(mealLogs.getId()));
 
     }

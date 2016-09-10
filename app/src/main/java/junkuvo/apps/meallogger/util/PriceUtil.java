@@ -11,4 +11,12 @@ public class PriceUtil {
     public void retrievePriceSum(){
 
     }
+
+    public static long parsePriceToLong(String price, String prefix){
+        return Long.parseLong(price.replace(prefix,"").replaceAll(",",""));
+    }
+
+    public static String parseLongToPrice(long price, String prefix){
+        return prefix + String.format("%,d", price);
+    }
 }

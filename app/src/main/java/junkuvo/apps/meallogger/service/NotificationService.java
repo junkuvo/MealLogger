@@ -8,8 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.widget.Toast;
 
+import junkuvo.apps.meallogger.ActivityLogListAll;
+import junkuvo.apps.meallogger.Application;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.util.NotificationUtil;
@@ -22,6 +23,7 @@ public class NotificationService extends Service {
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
     private NotificationEventReceiver mNotificationEventReceiver;
+    private String mNotificationName;
 
     @Override
     public void onCreate() {
@@ -64,14 +66,10 @@ public class NotificationService extends Service {
     // BindしたServiceをActivityに返す
     @Override
     public IBinder onBind(Intent intent) {
-        Toast.makeText(mContext, "onBind called by "
-                + Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
-
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationUtil notificationUtil = new NotificationUtil();
 //        notificationManager.notify(R.string.app_name, notificationUtil.createNotification(this));
-
-        startForeground(R.string.app_name, notificationUtil.createNotification(this));
+        startForeground(R.string.app_name, notificationUtil.createNotification(mContext));
 
         return new NotificationBinder();
     }
@@ -87,7 +85,7 @@ public class NotificationService extends Service {
 
     private void handleOnStart(Intent intent, int startId) {
 //        startForeground(1, new Notification());
-
+        mNotificationName = intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
     }
 
     public class NotificationBinder extends Binder {

@@ -343,6 +343,9 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
     public static final String BUNDLE_RRULE = "bundle_event_rrule";
     public static final String BUNDLE_HIDE_SWITCH_BUTTON = "bundle_hide_switch_button";
     public static final String BUNDLE_TITLE = "bundle_title";
+    public static final String BUNDLE_HOUR = "bundle_hour";
+    public static final String BUNDLE_MINUTE = "bundle_minute";
+    public static final String BUNDLE_DAYS = "bundle_days";
 
     private static final String BUNDLE_MODEL = "bundle_model";
     private static final String BUNDLE_END_COUNT_HAS_FOCUS = "bundle_end_count_has_focus";
@@ -693,6 +696,9 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         String title = null;
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int minute = Calendar.getInstance().get(Calendar.MINUTE);
+        String[] days = null;
         boolean endCountHasFocus = false;
         if (savedInstanceState != null) {
             RecurrenceModel m = (RecurrenceModel) savedInstanceState.get(BUNDLE_MODEL);
@@ -726,7 +732,13 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
                 mModel.forceHideSwitchButton = bundle.getBoolean(BUNDLE_HIDE_SWITCH_BUTTON, false);
 
-                title = bundle.getString(BUNDLE_TITLE);
+                // TODO : タイトルは必須とする
+                if(bundle.getString(BUNDLE_TITLE) != null) {
+                    title = bundle.getString(BUNDLE_TITLE);
+                    hour = bundle.getInt(BUNDLE_HOUR);
+                    minute = bundle.getInt(BUNDLE_MINUTE);
+                    days = bundle.getStringArray(BUNDLE_DAYS);
+                }
             } else {
                 mTime.setToNow();
             }
@@ -740,22 +752,23 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
 //        mRepeatSwitch = (SwitchCompat) mView.findViewById(R.id.repeat_switch);
         mRepeatSwitch = (WeekButton) mView.findViewById(R.id.repeat_switch);
-        if (mModel.forceHideSwitchButton) {
+//        if (mModel.forceHideSwitchButton) {
             mRepeatSwitch.setChecked(true);
             mRepeatSwitch.setVisibility(View.GONE);
             mModel.recurrenceState = RecurrenceModel.STATE_RECURRENCE;
-        } else {
-            mRepeatSwitch.setChecked(mModel.recurrenceState == RecurrenceModel.STATE_RECURRENCE);
-            mRepeatSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    mModel.recurrenceState = isChecked ? RecurrenceModel.STATE_RECURRENCE : RecurrenceModel.STATE_NO_RECURRENCE;
-                    togglePickerOptions();
-                }
-            });
-        }
+//        } else {
+//            mRepeatSwitch.setChecked(mModel.recurrenceState == RecurrenceModel.STATE_RECURRENCE);
+//            mRepeatSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+//
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    mModel.recurrenceState = isChecked ? RecurrenceModel.STATE_RECURRENCE : RecurrenceModel.STATE_NO_RECURRENCE;
+//                    togglePickerOptions();
+//                }
+//            });
+//        }
         mTimePicker = (TimePicker)mView.findViewById(R.id.timePicker);
+        mTimePicker.setIs24HourView(true);
         mEdtTitle = (EditText)mView.findViewById(R.id.txtTitle);
         mInterval = (EditText) mView.findViewById(R.id.interval);
         mInterval.addTextChangedListener(new minMaxTextWatcher(1, INTERVAL_DEFAULT, INTERVAL_MAX) {
@@ -923,7 +936,9 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 
         mDoneButton = (Button) mView.findViewById(R.id.done_button);
         mDoneButton.setOnClickListener(this);
-        setDialogStatus(title);
+        if(days != null) {
+            setDialogStatus(title, hour, minute, days);
+        }
 
         Button cancelButton = (Button) mView.findViewById(R.id.cancel_button);
         //FIXME no text color for this one ?
@@ -946,21 +961,30 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
         return mView;
     }
 
-    private void setDialogStatus(String title){
-//        int idx;
-//        for (idx = 0; idx < mWeekByDayButtons.length; idx++){
-//            mWeekByDayButtons[idx].setChecked(SharedPreferencesUtil.getBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString()));
-//        }
-//
-//        mRepeatSwitch.setChecked(SharedPreferencesUtil.getBoolean(getContext(),SHARED_PREF_KEY_REPEAT));
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            mTimePicker.setHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
-//            mTimePicker.setMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
-//        }else{
-//            mTimePicker.setCurrentHour(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_HOUR));
-//            mTimePicker.setCurrentMinute(SharedPreferencesUtil.getInt(getContext(),SHARED_PREF_KEY_MINUTE));
-//        }
+    private void setDialogStatus(String title, int hour, int minute, String[] days){
+        int i;
+        int j;
+        boolean isChecked;
+        int m = 0;
+        for (i = 1; i < days.length; i++) {
+            for (j = m; j < mWeekByDayButtons.length; j++) {
+                isChecked = days[i].equals(mWeekByDayButtons[j].getTextOn().toString());
+                mWeekByDayButtons[j].setChecked(isChecked);
+                if(isChecked){
+                    break;
+                }
+            }
+            m = j + 1;
+        }
         mEdtTitle.setText(title);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mTimePicker.setHour(hour);
+            mTimePicker.setMinute(minute);
+        }else{
+            mTimePicker.setCurrentHour(hour);
+            mTimePicker.setCurrentMinute(minute);
+        }
+
     }
 
     private void togglePickerOptions() {
@@ -1297,24 +1321,6 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
                 copyModelToEventRecurrence(mModel, mRecurrence);
                 rrule = mRecurrence.toString();
             }
-            int idx = 0;
-            for(idx = 0; idx < mWeekByDayButtons.length;idx++){
-                SharedPreferencesUtil.saveBoolean(getContext(),mWeekByDayButtons[idx].getTextOn().toString(),
-                        ((ToggleButton)mWeekByDayButtons[idx]).isChecked());
-            }
-            SharedPreferencesUtil.saveBoolean(getContext(),SHARED_PREF_KEY_REPEAT,mRepeatSwitch.isChecked());
-
-            int hour;
-            int minute;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                hour = mTimePicker.getHour();
-                minute = mTimePicker.getMinute();
-            } else {
-                hour = mTimePicker.getCurrentHour();
-                minute = mTimePicker.getCurrentMinute();
-            }
-            SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_HOUR,hour);
-            SharedPreferencesUtil.saveInt(getContext(),SHARED_PREF_KEY_MINUTE,minute);
 
             // preferenceに保存した後に下記を実行
             if(mRecurrenceSetListener != null) {

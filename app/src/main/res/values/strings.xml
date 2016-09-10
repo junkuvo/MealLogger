@@ -1,5 +1,9 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">メシ録</string>
+
+    <string name="page1_title">食事の記録</string>
+
+
     <string name="notification_message">食事の記録をつけましょう！</string>
     <string name="notification_ticker">食事の記録をつける時間です！</string>
     <string name="notification_subMessage">タップして記録をつけましょう！</string>
@@ -11,12 +15,13 @@
     <string name="dialog_yes">はい</string>
     <string name="dialog_no">いいえ</string>
     <string name="dialog_register_title">何を食べましたか？</string>
+    <string name="dialog_register_update_title">記録を変更しますか？</string>
     <string name="dialog_scheduler_title">記録タイミング</string>
-    <string name="dialog_scheduler_message">記録タイミングは5つまで設定可能です。</string>
+    <string name="dialog_scheduler_message">タップで変更可能です</string>
     <string name="dialog_time_title">記録タイミング変更</string>
     <string name="dialog_time_delete">記録タイミングを削除します</string>
 
-    <string name="dialog_time_cancel">キャンセル</string>
+    <string name="dialog_time_cancel">完了</string>
     <string name="dialog_time_create">新規作成</string>
     <string name="dialog_time_titlehint">通知タイトル</string>
 

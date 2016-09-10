@@ -9,12 +9,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ActivityLogRegister">
 
-    <EditText
+    <AutoCompleteTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="食べたもの"
         android:id="@+id/edtMealMenu"
         android:textSize="24sp"
+        android:singleLine="true"
+        android:gravity="center"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 

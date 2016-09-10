@@ -7,8 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
 import junkuvo.apps.meallogger.entity.MealLogs;
 
@@ -23,7 +23,7 @@ public class ActivityLogRegister extends AppCompatActivity implements RecyclerVi
     // RecyclerViewとAdapter
     private RecyclerView mRecyclerView = null;
     private RecyclerViewAdapter mAdapter = null;
-    private OrderedRealmCollection<MealLogs> mItems;
+    private RealmResults<MealLogs> mItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
