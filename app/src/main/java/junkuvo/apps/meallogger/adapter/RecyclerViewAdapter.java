@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.codetroopers.betterpickers.SharedPreferencesUtil;
 
 import java.text.SimpleDateFormat;
+import java.text.StringCharacterIterator;
 
 import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
@@ -33,12 +34,15 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 
     private Realm realm;
     private AlertDialog.Builder mAlertDialog;
+    private int mMealLogsLastPosition;
+    private View mMealLogsRowView;
 
     public RecyclerViewAdapter(Context context, RealmResults<MealLogs> data) {
         super(context ,data, true);
         this.mContext = context;
 
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        mMealLogsLastPosition = data.size() - 1;
     }
 
     @Override
@@ -46,12 +50,12 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         // Inflate the custom layout
-        View rowView = inflater.inflate(R.layout.list_row, null);
+        mMealLogsRowView = inflater.inflate(R.layout.list_row, null);
 
         // Return a new holder instance
-        ListRowViewHolder viewHolder = new ListRowViewHolder(mContext, rowView);
+        ListRowViewHolder viewHolder = new ListRowViewHolder(mContext, mMealLogsRowView);
 
-        rowView.setOnClickListener(new View.OnClickListener() {
+        mMealLogsRowView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 final long id = Long.parseLong(((TextView)v.findViewById(R.id.txtId)).getText().toString());
                 String mealMenu = ((TextView) v.findViewById(R.id.txtMealMenu)).getText().toString();
@@ -108,7 +112,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
             }
         });
 
-        rowView.setOnLongClickListener(new View.OnLongClickListener() {
+        mMealLogsRowView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
 
@@ -118,7 +122,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                 mAlertDialog.setTitle(mContext.getString(R.string.dialog_title));
                 mAlertDialog.setIcon(R.drawable.ic_delete_forever_black_48dp);
                 mAlertDialog.setMessage(R.string.dialog_message);
-                mAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_log_delete_yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         realm = Realm.getDefaultInstance();
@@ -144,7 +148,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                         });
                     }
                 });
-                mAlertDialog.setNegativeButton("CANCEL", null);
+                mAlertDialog.setNegativeButton(mContext.getString(R.string.dialog_log_delete_no), null);
                 mAlertDialog.create().show();
                 return true;
             }
@@ -163,7 +167,9 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         holder.getImvThumbnail().setImageResource(mealLogs.getThumbnailResourceID());
         holder.getTxtPrice().setText(PriceUtil.parseLongToPrice(mealLogs.getPrice(),"¥"));
         holder.getTxtId().setText(String.valueOf(mealLogs.getId()));
-
+//        if(position == mMealLogsLastPosition){
+//            mMealLogsRowView.setPadding(0,0,0,mContext.getResources().getDimensionPixelSize(R.dimen.footer_padding_recyclerview));
+//        }
     }
 
 //    /*
@@ -214,4 +220,11 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 //    }
 
 
+    public int getmMealLogsLastPosition() {
+        return mMealLogsLastPosition;
+    }
+
+    public void setmMealLogsLastPosition(int mMealLogsLastPosition) {
+        this.mMealLogsLastPosition = mMealLogsLastPosition;
+    }
 }

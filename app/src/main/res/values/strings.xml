@@ -3,6 +3,8 @@
 
     <string name="page1_title">食事の記録</string>
 
+    <string name="dialog_log_delete_yes">はい</string>
+    <string name="dialog_log_delete_no">いいえ</string>
 
     <string name="notification_message">食事の記録をつけましょう！</string>
     <string name="notification_ticker">食事の記録をつける時間です！</string>
@@ -10,16 +12,16 @@
     <string name="notification_addSame">前回と同じ</string>
     <string name="notification_addNew">新しく入力</string>
 
-    <string name="dialog_title">削除します</string>
+    <string name="dialog_title">削除</string>
     <string name="dialog_message">この記録を削除してよろしいですか？</string>
     <string name="dialog_yes">はい</string>
     <string name="dialog_no">いいえ</string>
     <string name="dialog_register_title">何を食べましたか？</string>
     <string name="dialog_register_update_title">記録を変更しますか？</string>
     <string name="dialog_scheduler_title">記録タイミング</string>
-    <string name="dialog_scheduler_message">タップで変更可能です</string>
+    <string name="dialog_scheduler_message">タップで設定変更可能です</string>
     <string name="dialog_time_title">記録タイミング変更</string>
-    <string name="dialog_time_delete">記録タイミングを削除します</string>
+    <string name="dialog_time_delete">記録タイミング削除</string>
 
     <string name="dialog_time_cancel">完了</string>
     <string name="dialog_time_create">新規作成</string>

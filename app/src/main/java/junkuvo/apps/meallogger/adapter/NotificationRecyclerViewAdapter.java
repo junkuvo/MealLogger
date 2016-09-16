@@ -1,6 +1,5 @@
 package junkuvo.apps.meallogger.adapter;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -29,11 +28,11 @@ import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 import junkuvo.apps.meallogger.ActivityLogListAll;
-import junkuvo.apps.meallogger.Application;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.entity.NotificationTime;
 import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.util.NotificationScheduler;
+import junkuvo.apps.meallogger.util.SharedPreferencesUtil;
 import junkuvo.apps.meallogger.view.TimerListRowViewHolder;
 
 public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<NotificationTime, TimerListRowViewHolder>
@@ -148,7 +147,7 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                                 Calendar calendar = notificationScheduler.createNextNotifySchedule();
                                 mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
                                 Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
-                                broadCastIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, ((Application)((Activity)mContext).getApplication()).mNotificationScheduleName);
+                                broadCastIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
                                 mAlarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent);
                             }
@@ -172,7 +171,7 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                 // Handle long click
                 mAlertDialog = new AlertDialog.Builder(mContext);
                 mAlertDialog.setTitle(mContext.getString(R.string.dialog_time_delete));
-                mAlertDialog.setMessage("「" + ((TextView)v.findViewById(R.id.txtTitle)).getText() + "」を削除します。"); // TODO : 引数わたしみたいに
+                mAlertDialog.setMessage("「" + ((TextView)v.findViewById(R.id.txtTitle)).getText() + "」を削除してよろしいですか？"); // TODO : 引数わたしみたいに
                 mAlertDialog.setIcon(R.drawable.ic_delete_forever_black_48dp);
                 mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
                     @Override
@@ -213,7 +212,15 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
     public void onBindViewHolder(TimerListRowViewHolder holder, int position) {
         NotificationTime notificationTime = getData().get(position);
         holder.getTxtTitle().setText(notificationTime.getmTitle());
-        holder.getTxtTime().setText(notificationTime.getmTime());
+        String time = notificationTime.getmTime();
+        String hour = time.split(":")[0];
+        String minute = time.split(":")[1];
+        //　ここも共通化できる
+        String hourStr = hour.length() == 1 ? "0" + hour : hour;
+        String minuteStr = minute.length() == 1 ? "0" + minute : minute;
+
+        holder.getTxtTime().setText(hourStr + ":" + minuteStr);
+
         holder.getTxtDays().setText(notificationTime.getmDays());
         holder.getTxtId().setText(String.valueOf(notificationTime.getId()));
     }

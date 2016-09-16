@@ -55,4 +55,8 @@
     <color name="recurrence_bubble_text_normal">#ff737373</color>
 
     <color name="radial_gray_light">#f5f5f5</color>
+
+    <color name="green1">#1B5E20</color>
+    <color name="green2">#388E3C</color>
+
 </resources>

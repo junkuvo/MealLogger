@@ -66,9 +66,7 @@ public class NotificationService extends Service {
     // BindしたServiceをActivityに返す
     @Override
     public IBinder onBind(Intent intent) {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationUtil notificationUtil = new NotificationUtil();
-//        notificationManager.notify(R.string.app_name, notificationUtil.createNotification(this));
         startForeground(R.string.app_name, notificationUtil.createNotification(mContext));
 
         return new NotificationBinder();

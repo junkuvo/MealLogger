@@ -1,6 +1,5 @@
 package junkuvo.apps.meallogger;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -27,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
@@ -57,10 +57,14 @@ public class ActivityLogListAll extends AppCompatActivity
 
     public static final String PREF_KEY_MEAL_NAME = "mealName";
     public static final String PREF_KEY_MEAL_PRICE = "mealPrice";
+    public static final String PREF_KEY_NOTIFICATION_NAME = "prefnotificationScheduleName";
+    public static final String PREF_KEY_NOTIFICATION_ID = "prefnotificationScheduleId";
+    // TODO:不要
     public static final String INTENT_KEY_NOTIFICATION_NAME = "notificationScheduleName";
 
 
-    private AlertDialog.Builder mAlertDialog;
+    private AlertDialog.Builder mAlertDialogBuilder;
+    private AlertDialog mAlertDialog;
 
     public static final String FRAG_TAG_RECUR_PICKER = "recurPicker";
     private Realm realm;
@@ -68,6 +72,7 @@ public class ActivityLogListAll extends AppCompatActivity
     private AlarmManager mAlarmManager;
     private PendingIntent mAlarmIntent;
     private EllipseTextView mEllipseTextView;
+    private boolean mIsDialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,44 +101,55 @@ public class ActivityLogListAll extends AppCompatActivity
 
                 EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
                 priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
-                mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
-                mAlertDialog.setTitle(getString(R.string.dialog_register_title));
-                // TODO : いい感じのアイコン作成
-                mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
-                mAlertDialog.setView(layout);
-                mAlertDialog.setPositiveButton(getString(R.string.dialog_log_create), new DialogInterface.OnClickListener() {
+                mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
+                mAlertDialogBuilder.setTitle(getString(R.string.dialog_register_title));
+                // TODO : いい感じのアイコン作成(箸と茶碗の画像)
+                mAlertDialogBuilder.setIcon(R.drawable.ic_meal_done);
+                mAlertDialogBuilder.setView(layout);
+                mAlertDialogBuilder.setPositiveButton(getString(R.string.dialog_log_create), null);
+                mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_log_cancel), null);
+                final AlertDialog alertDialog = mAlertDialogBuilder.show();
+                mIsDialogShown = true;
+                Button buttonOK = alertDialog.getButton( DialogInterface.BUTTON_POSITIVE );
+                buttonOK.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        realm = Realm.getDefaultInstance();
-                        realm.executeTransactionAsync(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm bgRealm) {
-                                String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                                String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
-                                MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                                mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price,"¥"));
-                            }
-                        }, new Realm.Transaction.OnSuccess() {
-                            @Override
-                            public void onSuccess() {
-                                // トランザクションは成功
-                                String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                                String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
-                                // TODO : 修正の場合もこれ ＋ 通知IDで各通知と紐付ける
-                                SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_NAME,menuName);
-                                SharedPreferencesUtil.saveString(getApplicationContext(),PREF_KEY_MEAL_PRICE,price);
-                            }
-                        }, new Realm.Transaction.OnError() {
-                            @Override
-                            public void onError(Throwable error) {
-                                // トランザクションは失敗。自動的にキャンセルされます
-                                error.printStackTrace();
-                            }
-                        });
+                    public void onClick(View view) {
+                        String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                        String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                        if(menuName.equals("") || price.equals("")){
+                            Toast.makeText(ActivityLogListAll.this, "食べたもの・値段を入力してください", Toast.LENGTH_LONG).show();
+                        }else {
+                            realm = Realm.getDefaultInstance();
+                            realm.executeTransactionAsync(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm bgRealm) {
+                                    String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                    String price = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                                    MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
+                                    mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price, "¥"));
+                                }
+                            }, new Realm.Transaction.OnSuccess() {
+                                @Override
+                                public void onSuccess() {
+                                    // トランザクションは成功
+                                    String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                    String price = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                                    // TODO : 修正の場合もこれ ＋ 通知IDで各通知と紐付ける
+                                    String notificationName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
+                                    SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_NAME + notificationName, menuName);
+                                    SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + notificationName, price);
+                                    alertDialog.dismiss();
+                                }
+                            }, new Realm.Transaction.OnError() {
+                                @Override
+                                public void onError(Throwable error) {
+                                    // トランザクションは失敗。自動的にキャンセルされます
+                                    error.printStackTrace();
+                                }
+                            });
+                        }
                     }
                 });
-                mAlertDialog.setNegativeButton(getString(R.string.dialog_log_cancel), null);
-                mAlertDialog.create().show();
             }
         });
 
@@ -157,11 +173,17 @@ public class ActivityLogListAll extends AppCompatActivity
         setNotification();
 
         Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
-        intent.putExtra(INTENT_KEY_NOTIFICATION_NAME, ((Application)getApplication()).mNotificationScheduleName);
+        intent.putExtra(INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(this,ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
         // アプリのプロセス自体が消えるとアラームが実行されないのでサービスにしておく
         // 一度設定したアラームはプロセスを消すと消える
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
     }
 
 
@@ -310,27 +332,27 @@ public class ActivityLogListAll extends AppCompatActivity
         layout = inflater.inflate(R.layout.dialog_time_list, null);
 
         FragmentManager fm = getSupportFragmentManager();
-        mAlertDialog = new AlertDialog.Builder(ActivityLogListAll.this);
-        mAlertDialog.setTitle(getString(R.string.dialog_scheduler_title));
+        mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
+        mAlertDialogBuilder.setTitle(getString(R.string.dialog_scheduler_title));
         // TODO : いい感じのアイコン作成
-        mAlertDialog.setIcon(R.drawable.ic_alarm_black_48dp);
-        mAlertDialog.setMessage(getString(R.string.dialog_scheduler_message));
+        mAlertDialogBuilder.setIcon(R.drawable.ic_alarm_black_48dp);
+        mAlertDialogBuilder.setMessage(getString(R.string.dialog_scheduler_message));
         RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(ActivityLogListAll.this));
         realm = Realm.getDefaultInstance();
         OrderedRealmCollection<NotificationTime> times = realm.where(NotificationTime.class).findAllAsync();
         NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(ActivityLogListAll.this,times,fm);
         recyclerView.setAdapter(adapter);
-        mAlertDialog.setView(layout);
-        mAlertDialog.setPositiveButton(getString(R.string.dialog_time_cancel), null);
-        mAlertDialog.setNegativeButton(getString(R.string.dialog_time_create), new DialogInterface.OnClickListener() {
+        mAlertDialogBuilder.setView(layout);
+        mAlertDialogBuilder.setPositiveButton(getString(R.string.dialog_time_cancel), null);
+        mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_time_create), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 showScheduleDialog();
             }
         });
-        mAlertDialog.create().show();
-
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.show();
     }
 
     public void setNotification(){
@@ -341,8 +363,31 @@ public class ActivityLogListAll extends AppCompatActivity
         Calendar calendar = notificationScheduler.createNextNotifySchedule();
         mAlarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
-        broadCastIntent.putExtra(INTENT_KEY_NOTIFICATION_NAME, ((Application)getApplication()).mNotificationScheduleName);
+        broadCastIntent.putExtra(INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(this,ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
         mAlarmIntent = PendingIntent.getBroadcast(this, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent);
+    }
+
+    @Override
+    public void onBackPressed(){
+//        super.onBackPressed();
+        if(mAlertDialog == null || !mAlertDialog.isShowing()) {
+            mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
+            mAlertDialogBuilder.setMessage("アプリを終了しますか？");
+            mAlertDialogBuilder.setPositiveButton("はい", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            mAlertDialogBuilder.setNegativeButton("いいえ", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            mAlertDialog = mAlertDialogBuilder.create();
+            mAlertDialog.show();
+        }
     }
 }

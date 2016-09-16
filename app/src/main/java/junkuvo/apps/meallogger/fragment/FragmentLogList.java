@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
 import junkuvo.apps.meallogger.entity.MealLogs;
@@ -77,7 +78,7 @@ public class FragmentLogList extends Fragment {
 //    }
 
     private void setUpRecyclerView() {
-        mItems = realm.where(MealLogs.class).findAllAsync();
+        mItems = realm.where(MealLogs.class).findAllSorted("createdAt", Sort.DESCENDING);
         mItems.addChangeListener(new RealmChangeListener<RealmResults<MealLogs>>() {
             @Override
             public void onChange(RealmResults<MealLogs> element) {
@@ -86,6 +87,9 @@ public class FragmentLogList extends Fragment {
                 mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
             }
         });
+        long sum = mItems.sum("price").longValue();
+        mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
+
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         mAdapter = new RecyclerViewAdapter(mContext, mItems);//new CardViewAdapter(mItems, itemTouchListener);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));

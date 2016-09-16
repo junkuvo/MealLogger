@@ -1,8 +1,6 @@
 package junkuvo.apps.meallogger.util;
 
-import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -10,7 +8,7 @@ import java.util.Calendar;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import junkuvo.apps.meallogger.Application;
+import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.entity.NotificationTime;
 
 public class NotificationScheduler {
@@ -98,7 +96,8 @@ public class NotificationScheduler {
         calendar.set(Calendar.DAY_OF_WEEK, day);
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(mNotificationTime.getmTime().split(":")[0]));
         calendar.set(Calendar.MINUTE, Integer.parseInt(mNotificationTime.getmTime().split(":")[1]));
-        ((Application)((Activity)mContext).getApplication()).mNotificationScheduleName = mNotificationTime.getmTitle();
+        //((Application)((Activity)mContext).getApplication()).mNotificationScheduleName = mNotificationTime.getmTitle();
+        SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationTime.getmTitle());
 
         return calendar;
     }

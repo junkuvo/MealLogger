@@ -12,7 +12,6 @@ import junkuvo.apps.meallogger.entity.NotificationTimes;
 public class Application extends android.app.Application {
 
     private static final String PREF_KEY_INITIALIZED_FLAG = "initialized_flag";
-    public String mNotificationScheduleName;
 
     @Override
     public void onCreate() {

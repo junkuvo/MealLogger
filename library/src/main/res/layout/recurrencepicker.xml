@@ -68,6 +68,7 @@
                         android:text=""
                         android:layout_gravity="center"
                         android:gravity="center"
+                        android:textColor="#1B5E20"
                         android:singleLine="true"
                         android:id="@+id/txtTitle" />
 
@@ -265,6 +266,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/timePicker"
+                    android:headerBackground="@color/green2"
                     android:layout_centerHorizontal="true" />
             </LinearLayout>
         </ScrollView>

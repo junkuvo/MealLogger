@@ -6,12 +6,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 
 import junkuvo.apps.meallogger.ActivityLogListAll;
-import junkuvo.apps.meallogger.ActivityLogRegister;
-import junkuvo.apps.meallogger.Application;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 
@@ -40,13 +37,14 @@ public class NotificationUtil {
         // This will show-up in the devices with Android 4.2 and above only
         builder.setSubText(context.getString(R.string.notification_subMessage));
 
+        // TODO : 修正の場合もこれ ＋ 通知IDで各通知と紐付ける
         // FixMe : Nullでも文字列のNullとして取得される！？
-        if (SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME) != null
-                && SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE) != null) {
+        if (SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName) != null
+                && SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName) != null) {
             builder.setContentText("前回の" + notificationName + "は "
-                    + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME)
-                    + " " + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE) + "でした");
-            builder.addAction(R.drawable.ic_stat_add, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
+                    + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName)
+                    + " " + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName) + "でした");
+            builder.addAction(R.drawable.ic_add, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
 //            builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew), getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
             // Content text, which appears in smaller text below the title
         }else{
@@ -76,7 +74,7 @@ public class NotificationUtil {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 
         //icon appears in device notification bar and right hand corner of notification
-        builder.setSmallIcon(R.drawable.ic_add_alarm_white_48dp);
+        builder.setSmallIcon(R.drawable.ic_stat_empty);
 
 //        // This intent is fired when notification is clicked
 //        Intent intent = new Intent(context, ActivityLogListAll.class);
