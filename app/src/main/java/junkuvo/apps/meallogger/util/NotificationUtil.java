@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.renderscript.RenderScript;
 import android.support.v7.app.NotificationCompat;
 
 import junkuvo.apps.meallogger.ActivityLogListAll;
@@ -27,7 +28,7 @@ public class NotificationUtil {
         builder.setSmallIcon(R.drawable.ic_stat);
 
         // Large icon appears on the left of the notification
-        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
+//        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
 
         // Content title, which appears in large type at the top of the notification
         builder.setContentTitle(context.getString(R.string.app_name));
@@ -37,17 +38,15 @@ public class NotificationUtil {
         // This will show-up in the devices with Android 4.2 and above only
         builder.setSubText(context.getString(R.string.notification_subMessage));
 
-        // TODO : 修正の場合もこれ ＋ 通知IDで各通知と紐付ける
-        // FixMe : Nullでも文字列のNullとして取得される！？
         if (SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName) != null
                 && SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName) != null) {
             builder.setContentText("前回の" + notificationName + "は "
                     + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName)
                     + " " + SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName) + "でした");
-            builder.addAction(R.drawable.ic_add, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
+            builder.addAction(R.drawable.ic_action_meal_done, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
 //            builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew), getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
             // Content text, which appears in smaller text below the title
-        }else{
+        } else {
             builder.setContentText(context.getString(R.string.notification_message));
         }
         builder.setContentIntent(getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
@@ -56,6 +55,15 @@ public class NotificationUtil {
         long[] pattern = {500, 1000, 500, 1000}; // OFF/ON/OFF/ON...
         builder.setVibrate(pattern);
         // Will display the notification in the notification bar
+
+        // ロックスクリーン上でどう見えるか
+        builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+
+        builder.setPriority(Notification.PRIORITY_MAX);
+
+        // 通知の種類 システムがうまいこと扱ってくれる https://developer.android.com/reference/android/app/Notification.html?hl=ja
+        builder.setCategory(Notification.CATEGORY_ALARM);
+
         notificationManager.notify(R.string.app_name, builder.build());
     }
 
@@ -86,7 +94,7 @@ public class NotificationUtil {
         builder.setContentIntent(getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_SERVICE_NOTIFICATION));
 
         // Large icon appears on the left of the notification
-        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
+//        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
 
         // Content title, which appears in large type at the top of the notification
         builder.setContentTitle(context.getString(R.string.app_name));
@@ -98,6 +106,12 @@ public class NotificationUtil {
         // The subtext, which appears under the text on newer devices.
         // This will show-up in the devices with Android 4.2 and above only
         builder.setSubText(context.getString(R.string.notification_subMessage));
+
+        // ロックスクリーン上でどう見えるか(SECRETにしても表示される。。。？)
+        builder.setVisibility(Notification.VISIBILITY_SECRET);
+
+        // PRIORITY_MINだとどこにも表示されなくなる
+        builder.setPriority(Notification.PRIORITY_MIN);
 
         return builder.build();
     }

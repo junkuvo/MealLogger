@@ -23,7 +23,8 @@
     <string name="dialog_time_title">記録タイミング変更</string>
     <string name="dialog_time_delete">記録タイミング削除</string>
 
-    <string name="dialog_time_cancel">完了</string>
+    <string name="dialog_time_done">戻る</string>
+    <string name="dialog_time_cancel">キャンセル</string>
     <string name="dialog_time_create">新規作成</string>
     <string name="dialog_time_titlehint">通知タイトル</string>
 

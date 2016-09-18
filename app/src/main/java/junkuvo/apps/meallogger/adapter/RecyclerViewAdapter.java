@@ -71,8 +71,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                 priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
                 mAlertDialog = new AlertDialog.Builder(mContext);
                 mAlertDialog.setTitle(mContext.getString(R.string.dialog_register_update_title));
-                // TODO : いい感じのアイコン作成
-                mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
+                mAlertDialog.setIcon(R.drawable.ic_meal_done);
                 mAlertDialog.setView(layout);
                 mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_log_create), new DialogInterface.OnClickListener() {
                     @Override
@@ -108,6 +107,43 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                     }
                 });
                 mAlertDialog.setNegativeButton(mContext.getString(R.string.dialog_log_cancel), null);
+                mAlertDialog.setNeutralButton("削除", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle(mContext.getString(R.string.dialog_title));
+                        builder.setIcon(R.drawable.ic_delete_forever_black_48dp);
+                        builder.setMessage(R.string.dialog_message);
+                        builder.setPositiveButton(mContext.getString(R.string.dialog_log_delete_yes), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                realm = Realm.getDefaultInstance();
+                                realm.executeTransactionAsync(new Realm.Transaction() {
+                                    @Override
+                                    public void execute(Realm bgRealm) {
+                                        // realm はUIスレッドから変更できない
+                                        final RealmResults<MealLogs> result =
+                                                bgRealm.where(MealLogs.class)
+                                                        .equalTo("id", id)
+                                                        .findAll();
+                                        result.deleteFromRealm(0);
+                                    }
+                                }, new Realm.Transaction.OnSuccess() {
+                                    @Override
+                                    public void onSuccess() {
+                                    }
+                                }, new Realm.Transaction.OnError() {
+                                    @Override
+                                    public void onError(Throwable error) {
+                                        // トランザクションは失敗。自動的にキャンセルされます
+                                    }
+                                });
+                            }
+                        });
+                        builder.setNegativeButton(mContext.getString(R.string.dialog_log_delete_no), null);
+                        builder.create().show();
+                    }
+                });
                 mAlertDialog.create().show();
             }
         });
@@ -179,46 +215,6 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 //    public int getItemCount() {
 //        return mItemList.size();
 //    }
-
-//    @Override
-//    public boolean onLongClick(View view) {
-//        // RecyclerViewのせいか？呼ばれない
-//        final RealmResults<MealLogs> result =
-//                realm.where(MealLogs.class)
-//                        .equalTo("id", ((TextView)view.findViewById(R.id.txtId)).getText().toString())
-//                        .findAll();
-//
-//        // Handle long click
-//        mAlertDialog = new AlertDialog.Builder(mContext);
-//        mAlertDialog.setTitle(mContext.getString(R.string.action_settings));
-//        mAlertDialog.setIcon(android.R.drawable.ic_menu_manage);
-//        mAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                realm = Realm.getDefaultInstance();
-//                realm.executeTransactionAsync(new Realm.Transaction() {
-//                    @Override
-//                    public void execute(Realm bgRealm) {
-//                        result.deleteFromRealm(0);
-//                    }
-//                }, new Realm.Transaction.OnSuccess() {
-//                    @Override
-//                    public void onSuccess() {
-//                    }
-//                }, new Realm.Transaction.OnError() {
-//                    @Override
-//                    public void onError(Throwable error) {
-//                        // トランザクションは失敗。自動的にキャンセルされます
-//                    }
-//                });
-//            }
-//        });
-//        mAlertDialog.setNegativeButton("CANCEL", null);
-//        mAlertDialog.create().show();
-
-//        return true; // true : avoid to fire onClick(v)
-//    }
-
 
     public int getmMealLogsLastPosition() {
         return mMealLogsLastPosition;

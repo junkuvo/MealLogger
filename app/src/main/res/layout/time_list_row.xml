@@ -20,7 +20,6 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         card_view:cardCornerRadius="4dp"
-        card_view:cardBackgroundColor="#E8F5E9"
         >
 
         <RelativeLayout

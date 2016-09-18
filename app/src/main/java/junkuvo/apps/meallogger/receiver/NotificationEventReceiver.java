@@ -56,6 +56,7 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 break;
 
             case ADD_NOTIFICATION: // 前回と同じ
+                mNotificationName = SharedPreferencesUtil.getString(mContext,ActivityLogListAll.PREF_KEY_NOTIFICATION_ID);
                 realm = Realm.getDefaultInstance();
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
@@ -75,8 +76,6 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                         notificationUtil.cancelNotification(mContext,R.string.app_name);
                         notificationManager.notify(R.string.app_name, notificationUtil.createNotification(mContext));
 
-                        // トランザクションは成功
-                        Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show();
                         NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
                         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
                         // // TODO: 9/13/16 :  createNextNotifyScheduleからSharedPreferencesUtilの部分をぶんりしたい
@@ -108,7 +107,11 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 PendingIntent alarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
                 // onCreateから呼びなおしているため、通知も元に戻る
-                mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                Intent clickIntent = new Intent(mContext, ActivityLogListAll.class);
+                clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                // TODO : このフラグとかもEnumにするべき？
+                clickIntent.putExtra(ActivityLogListAll.INTENT_KEY_FROM_NOTIFICATION, true);
+                mContext.startActivity(clickIntent);
                 break;
             case CLICK_SERVICE_NOTIFICATION:
                 mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));

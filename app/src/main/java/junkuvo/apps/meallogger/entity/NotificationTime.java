@@ -49,4 +49,11 @@ public class NotificationTime extends RealmObject {
         setmTime(time);
         setmDays(days);
     }
+
+    public void setNotificationTime(long id, String title, String time, String days){
+        setId(id);
+        setmTitle(title);
+        setmTime(time);
+        setmDays(days);
+    }
 }

@@ -94,9 +94,9 @@ public class NotificationScheduler {
         }
 
         calendar.set(Calendar.DAY_OF_WEEK, day);
+
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(mNotificationTime.getmTime().split(":")[0]));
         calendar.set(Calendar.MINUTE, Integer.parseInt(mNotificationTime.getmTime().split(":")[1]));
-        //((Application)((Activity)mContext).getApplication()).mNotificationScheduleName = mNotificationTime.getmTitle();
         SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationTime.getmTitle());
 
         return calendar;

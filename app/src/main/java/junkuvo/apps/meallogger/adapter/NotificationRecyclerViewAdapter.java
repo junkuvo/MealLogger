@@ -116,7 +116,7 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
 
                                 // TODO : これはUtilクラスに移殖
                                 String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtTitle)).getText().toString();
-                                int hour;
+                                Integer hour;
                                 int minute;
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     hour = ((TimePicker)view.findViewById(com.codetroopers.betterpickers.R.id.timePicker)).getHour();
@@ -125,7 +125,10 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                                     hour = ((TimePicker)view.findViewById(com.codetroopers.betterpickers.R.id.timePicker)).getCurrentHour();
                                     minute = ((TimePicker)view.findViewById(com.codetroopers.betterpickers.R.id.timePicker)).getCurrentMinute();
                                 }
-                                String notificationTime = String.valueOf(hour) + ":" + String.valueOf(minute);
+                                //　ここも共通化できる
+                                String hourStr = String.valueOf(hour).length() == 1 ? "0" + String.valueOf(hour) : String.valueOf(hour);
+                                String minuteStr = String.valueOf(minute).length() == 1 ? "0" + String.valueOf(minute) : String.valueOf(minute);
+                                String notificationTime = hourStr + ":" + minuteStr;
                                 StringBuilder sb = new StringBuilder();
                                 ToggleButton toggleButton;
                                 for(int i = 0; i < 7;i++) {
@@ -215,12 +218,8 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
         String time = notificationTime.getmTime();
         String hour = time.split(":")[0];
         String minute = time.split(":")[1];
-        //　ここも共通化できる
-        String hourStr = hour.length() == 1 ? "0" + hour : hour;
-        String minuteStr = minute.length() == 1 ? "0" + minute : minute;
 
-        holder.getTxtTime().setText(hourStr + ":" + minuteStr);
-
+        holder.getTxtTime().setText(String.valueOf(hour) + ":" + String.valueOf(minute));
         holder.getTxtDays().setText(notificationTime.getmDays());
         holder.getTxtId().setText(String.valueOf(notificationTime.getId()));
     }
