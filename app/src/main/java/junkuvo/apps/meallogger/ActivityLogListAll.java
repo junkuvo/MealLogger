@@ -351,10 +351,10 @@ public class ActivityLogListAll extends AppCompatActivity
         layout = inflater.inflate(R.layout.dialog_log_register, (ViewGroup) findViewById(R.id.layout_root));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityLogListAll.this, android.R.layout.simple_dropdown_item_1line, MENUS);
-        AutoCompleteTextView textView = (AutoCompleteTextView)layout.findViewById(R.id.edtMealMenu);
-        textView.setAdapter(adapter);
+        final AutoCompleteTextView txtMealName = (AutoCompleteTextView)layout.findViewById(R.id.edtMealMenu);
+        txtMealName.setAdapter(adapter);
 
-        EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
+        final EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
         priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
         mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
         mAlertDialogBuilder.setTitle(getString(R.string.dialog_register_title));
@@ -362,6 +362,11 @@ public class ActivityLogListAll extends AppCompatActivity
         mAlertDialogBuilder.setView(layout);
         mAlertDialogBuilder.setPositiveButton(getString(R.string.dialog_log_create), null);
         mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_log_cancel), null);
+
+        // TODO : 初回大丈夫か？？？
+        if(getIntent().getBooleanExtra(INTENT_KEY_FROM_NOTIFICATION,false)) {
+            mAlertDialogBuilder.setNeutralButton("前回の食事を入力", null);
+        }
 
         final AlertDialog alertDialog = mAlertDialogBuilder.show();
         mIsDialogShown = true;
@@ -402,6 +407,18 @@ public class ActivityLogListAll extends AppCompatActivity
                         }
                     });
                 }
+            }
+        });
+
+        Button buttonSameAsLastTime = alertDialog.getButton( DialogInterface.BUTTON_NEUTRAL );
+        buttonSameAsLastTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String notificationName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(),ActivityLogListAll.PREF_KEY_NOTIFICATION_ID);
+                String mealName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName);
+                String price = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName);
+                txtMealName.setText(mealName);
+                priceText.setText(price);
             }
         });
     }

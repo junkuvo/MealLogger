@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -62,7 +61,7 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                     @Override
                     public void execute(Realm bgRealm) {
                         MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                        // 下記がnullであればADD_NOTIFICATIONはBroadcastされないのでnull判定は不要
+                        // 下記がnullであればADD_NOTIFICATIONのActionは発生しないのでnull判定は不要
                         String mealName = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME + mNotificationName);
                         String price = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_MEAL_PRICE + mNotificationName);
 
@@ -95,8 +94,6 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 break;
             case DELETE_NOTIFICATION:
             case CLICK_NOTIFICATION:
-                // 次回のアラームを設定　Fixme:これは通知を出したタイミングがいいのでは？
-                // TODO : ここから開いた場合は新規登録ダイアログを開いておきたい
                 NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
                 AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
                 // // TODO: 9/13/16 :  createNextNotifyScheduleからSharedPreferencesUtilの部分をぶんりしたい
