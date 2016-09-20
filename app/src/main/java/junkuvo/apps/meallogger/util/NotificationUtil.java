@@ -5,8 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.renderscript.RenderScript;
 import android.support.v7.app.NotificationCompat;
 
 import junkuvo.apps.meallogger.ActivityLogListAll;
@@ -34,10 +32,6 @@ public class NotificationUtil {
         builder.setContentTitle(context.getString(R.string.app_name));
         builder.setTicker(context.getString(R.string.notification_ticker));
 
-        // The subtext, which appears under the text on newer devices.
-        // This will show-up in the devices with Android 4.2 and above only
-        builder.setSubText(context.getString(R.string.notification_subMessage));
-
         if (SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName) != null
                 && SharedPreferencesUtil.getString(context, ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName) != null) {
             builder.setContentText("前回の" + notificationName + "は "
@@ -46,7 +40,11 @@ public class NotificationUtil {
             builder.addAction(R.drawable.ic_action_meal_done, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
 //            builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew), getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
             // Content text, which appears in smaller text below the title
+            builder.setSubText("この通知を下方向へスワイプすると操作を短縮できます");
         } else {
+            // The subtext, which appears under the text on newer devices.
+            // This will show-up in the devices with Android 4.2 and above only
+            builder.setSubText(context.getString(R.string.notification_subMessage));
             builder.setContentText(context.getString(R.string.notification_message));
         }
         builder.setContentIntent(getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));

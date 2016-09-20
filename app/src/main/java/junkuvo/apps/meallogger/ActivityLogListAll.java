@@ -60,7 +60,6 @@ public class ActivityLogListAll extends AppCompatActivity
     public static final String PREF_KEY_MEAL_NAME = "mealName";
     public static final String PREF_KEY_MEAL_PRICE = "mealPrice";
     public static final String PREF_KEY_NOTIFICATION_NAME = "prefnotificationScheduleName";
-    public static final String PREF_KEY_NOTIFICATION_ID = "prefnotificationScheduleId";
     private static final String PREF_KEY_INITIALIZED_FLAG = "initialized_flag";
     // TODO:不要
     public static final String INTENT_KEY_NOTIFICATION_NAME = "notificationScheduleName";
@@ -77,6 +76,7 @@ public class ActivityLogListAll extends AppCompatActivity
     private PendingIntent mAlarmIntent;
     private EllipseTextView mEllipseTextView;
     private boolean mIsDialogShown = false;
+    private String mNotificationName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +93,7 @@ public class ActivityLogListAll extends AppCompatActivity
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
         if(getIntent().getBooleanExtra(INTENT_KEY_FROM_NOTIFICATION,false)){
+            mNotificationName = getIntent().getStringExtra(INTENT_KEY_NOTIFICATION_NAME);
             showMealLogCreateDialog();
         }
 
@@ -126,6 +127,8 @@ public class ActivityLogListAll extends AppCompatActivity
         }else {
             initializeSampleMealLog();
         }
+
+        getWindow().setBackgroundDrawableResource(R.color.colorBackground);
 
         final TutoShowcase tutoShowcase = TutoShowcase.from(this);
                 tutoShowcase.setContentView(R.layout.tutorial_notification)
@@ -394,9 +397,8 @@ public class ActivityLogListAll extends AppCompatActivity
                             // トランザクションは成功
                             String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
                             String price = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
-                            String notificationName = SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
-                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_NAME + notificationName, menuName);
-                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + notificationName, price);
+                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_NAME + mNotificationName, menuName);
+                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + mNotificationName, price);
                             alertDialog.dismiss();
                         }
                     }, new Realm.Transaction.OnError() {
@@ -414,7 +416,7 @@ public class ActivityLogListAll extends AppCompatActivity
         buttonSameAsLastTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String notificationName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(),ActivityLogListAll.PREF_KEY_NOTIFICATION_ID);
+                String notificationName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(),ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
                 String mealName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName);
                 String price = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName);
                 txtMealName.setText(mealName);

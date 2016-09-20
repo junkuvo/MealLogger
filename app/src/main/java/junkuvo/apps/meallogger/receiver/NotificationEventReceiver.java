@@ -51,11 +51,11 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 mNotificationName = bundle.getString(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
                 mNotificationUtil.showTimerDoneNotification(mContext, mNotificationName);
                 // 今回のNotificationの名前を保存しIDとして次の時にメニューと金額を利用する
-                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_ID,mNotificationName);
+                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationName);
                 break;
 
             case ADD_NOTIFICATION: // 前回と同じ
-                mNotificationName = SharedPreferencesUtil.getString(mContext,ActivityLogListAll.PREF_KEY_NOTIFICATION_ID);
+                mNotificationName = SharedPreferencesUtil.getString(mContext,ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
                 realm = Realm.getDefaultInstance();
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
@@ -94,6 +94,8 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 break;
             case DELETE_NOTIFICATION:
             case CLICK_NOTIFICATION:
+                // 現時点での通知IDを取得
+                mNotificationName = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
                 NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
                 AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
                 // // TODO: 9/13/16 :  createNextNotifyScheduleからSharedPreferencesUtilの部分をぶんりしたい
@@ -108,6 +110,7 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 // TODO : このフラグとかもEnumにするべき？
                 clickIntent.putExtra(ActivityLogListAll.INTENT_KEY_FROM_NOTIFICATION, true);
+                clickIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, mNotificationName);
                 mContext.startActivity(clickIntent);
                 break;
             case CLICK_SERVICE_NOTIFICATION:

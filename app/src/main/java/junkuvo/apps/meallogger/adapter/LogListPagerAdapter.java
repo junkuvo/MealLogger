@@ -10,7 +10,7 @@ import junkuvo.apps.meallogger.fragment.FragmentLogList;
 
 public class LogListPagerAdapter extends FragmentPagerAdapter {
 
-    private static final int PAGE_NUMBER = 1;
+    private static final int PAGE_NUMBER = 2;
     private Context mContext;
 
     public LogListPagerAdapter(FragmentManager fm) {
@@ -33,7 +33,7 @@ public class LogListPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return mContext.getString(R.string.page1_title);
             case 1:
-                return "test";
+                return  "開発中";
             default:
                 throw new RuntimeException("unexpected position: " + position);
         }
