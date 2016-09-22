@@ -74,4 +74,10 @@
 
         </RelativeLayout>
     </android.support.v7.widget.CardView>
+
+    <TextView
+        android:id="@+id/txtFooterSpace"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_padding_recyclerview"
+        android:visibility="gone" />
 </LinearLayout>

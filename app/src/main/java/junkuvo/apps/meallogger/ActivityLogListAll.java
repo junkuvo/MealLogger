@@ -18,6 +18,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +42,8 @@ import com.github.florent37.tutoshowcase.TutoShowcase;
 import java.util.Calendar;
 import java.util.Date;
 
+import icepick.Icepick;
+import icepick.State;
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import junkuvo.apps.meallogger.adapter.LogListPagerAdapter;
@@ -78,12 +82,18 @@ public class ActivityLogListAll extends AppCompatActivity
     private boolean mIsDialogShown = false;
     private String mNotificationName;
 
+    @State
+    String mMenuName = "";
+    @State
+    String mPrice = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list_all);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Icepick.restoreInstanceState(this, savedInstanceState);
 
         mEllipseTextView = (EllipseTextView)findViewById(R.id.txtSumPrice);
 
@@ -131,7 +141,7 @@ public class ActivityLogListAll extends AppCompatActivity
         getWindow().setBackgroundDrawableResource(R.color.colorBackground);
 
         final TutoShowcase tutoShowcase = TutoShowcase.from(this);
-                tutoShowcase.setContentView(R.layout.tutorial_notification)
+        tutoShowcase.setContentView(R.layout.tutorial_notification)
                 .on(fab_setting)
                 .addCircle()
                 .onClick(new View.OnClickListener() {
@@ -160,6 +170,12 @@ public class ActivityLogListAll extends AppCompatActivity
         // 一度設定したアラームはプロセスを消すと消える
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this, outState);
     }
 
     @Override
@@ -202,6 +218,11 @@ public class ActivityLogListAll extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
     }
 
     @Override
@@ -356,19 +377,62 @@ public class ActivityLogListAll extends AppCompatActivity
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityLogListAll.this, android.R.layout.simple_dropdown_item_1line, MENUS);
         final AutoCompleteTextView txtMealName = (AutoCompleteTextView)layout.findViewById(R.id.edtMealMenu);
         txtMealName.setAdapter(adapter);
+        txtMealName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mMenuName = charSequence.toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
 
         final EditText priceText = (EditText) layout.findViewById(R.id.edtMealPrice);
         priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
+        priceText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mPrice = charSequence.toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+
+        if(!mMenuName.equals("")) {
+            txtMealName.setText(mMenuName);
+        }
+        if(!mPrice.equals("")) {
+            priceText.setText(mPrice);
+        }
+
         mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
         mAlertDialogBuilder.setTitle(getString(R.string.dialog_register_title));
         mAlertDialogBuilder.setIcon(R.drawable.ic_meal_done);
         mAlertDialogBuilder.setView(layout);
         mAlertDialogBuilder.setPositiveButton(getString(R.string.dialog_log_create), null);
-        mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_log_cancel), null);
+        mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_log_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mMenuName = "";
+                mPrice = "";
+            }
+        });
+        mAlertDialogBuilder.setCancelable(false);
 
         // TODO : 初回大丈夫か？？？
         if(getIntent().getBooleanExtra(INTENT_KEY_FROM_NOTIFICATION,false)) {
-            mAlertDialogBuilder.setNeutralButton("前回の食事を入力", null);
+            mAlertDialogBuilder.setNeutralButton(getString(R.string.dialog_add_same), null);
         }
 
         final AlertDialog alertDialog = mAlertDialogBuilder.show();
@@ -377,28 +441,31 @@ public class ActivityLogListAll extends AppCompatActivity
         buttonOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String menuName = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                String price = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
-                if(menuName.equals("") || price.equals("")){
-                    Toast.makeText(ActivityLogListAll.this, "食べたもの・値段を入力してください", Toast.LENGTH_LONG).show();
+                mMenuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                mPrice = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                // 入力が空の場合
+                if(mMenuName.equals("") || mPrice.equals("")){
+                    Toast.makeText(ActivityLogListAll.this, getString(R.string.validation_message), Toast.LENGTH_LONG).show();
                 }else {
                     realm = Realm.getDefaultInstance();
                     realm.executeTransactionAsync(new Realm.Transaction() {
                         @Override
                         public void execute(Realm bgRealm) {
-                            String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                            String price = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
+//                            String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+//                            mPrice = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
                             MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                            mealLogs.setMealLog(R.mipmap.ic_launcher, menuName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price, "¥"));
+                            mealLogs.setMealLog(R.mipmap.ic_launcher, mMenuName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(mPrice, "¥"));
                         }
                     }, new Realm.Transaction.OnSuccess() {
                         @Override
                         public void onSuccess() {
                             // トランザクションは成功
-                            String menuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                            String price = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
-                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_NAME + mNotificationName, menuName);
-                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + mNotificationName, price);
+//                            mMenuName = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+//                            mPrice = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_NAME + mNotificationName, mMenuName);
+                            SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + mNotificationName, mPrice);
+                            mMenuName = "";
+                            mPrice = "";
                             alertDialog.dismiss();
                         }
                     }, new Realm.Transaction.OnError() {
@@ -417,10 +484,10 @@ public class ActivityLogListAll extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 String notificationName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(),ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
-                String mealName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName);
-                String price = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName);
-                txtMealName.setText(mealName);
-                priceText.setText(price);
+                mMenuName = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName);
+                mPrice = junkuvo.apps.meallogger.util.SharedPreferencesUtil.getString(getApplicationContext(), ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName);
+                txtMealName.setText(mMenuName);
+                priceText.setText(mPrice);
             }
         });
     }
@@ -431,7 +498,7 @@ public class ActivityLogListAll extends AppCompatActivity
             @Override
             public void execute(Realm bgRealm) {
                 MealLogs mealLogs = bgRealm.createObject(MealLogs.class);
-                mealLogs.setMealLog(R.mipmap.ic_launcher, "記録は長押しで削除できます", new Date(System.currentTimeMillis()),
+                mealLogs.setMealLog(R.mipmap.ic_launcher, getString(R.string.sample_data_title), new Date(System.currentTimeMillis()),
                         PriceUtil.parsePriceToLong("1000", "¥"));
             }
         }, new Realm.Transaction.OnSuccess() {
@@ -483,14 +550,14 @@ public class ActivityLogListAll extends AppCompatActivity
 //        super.onBackPressed();
         if(mAlertDialog == null || !mAlertDialog.isShowing()) {
             mAlertDialogBuilder = new AlertDialog.Builder(ActivityLogListAll.this);
-            mAlertDialogBuilder.setMessage("アプリを終了しますか？");
-            mAlertDialogBuilder.setPositiveButton("はい", new DialogInterface.OnClickListener() {
+            mAlertDialogBuilder.setMessage(getString(R.string.dialog_back_title));
+            mAlertDialogBuilder.setPositiveButton(getString(R.string.dialog_back_yes), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     finish();
                 }
             });
-            mAlertDialogBuilder.setNegativeButton("いいえ", new DialogInterface.OnClickListener() {
+            mAlertDialogBuilder.setNegativeButton(getString(R.string.dialog_back_no), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     return;

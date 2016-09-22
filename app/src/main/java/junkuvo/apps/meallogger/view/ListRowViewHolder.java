@@ -19,6 +19,7 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
     protected TextView txtMealDate;
     protected TextView txtPrice;
     protected TextView txtId;
+    protected TextView txtFooterSpace;
 
     public ListRowViewHolder(Context context, View view) {
         super(view);
@@ -28,6 +29,7 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtMealDate = (TextView) view.findViewById(R.id.txtMealDate);
         this.txtPrice = (TextView) view.findViewById(R.id.txtPrice);
         this.txtId = (TextView)view.findViewById(R.id.txtId);
+        this.txtFooterSpace = (TextView)view.findViewById(R.id.txtFooterSpace);
     }
 
     public TextView getTxtId() {
@@ -70,4 +72,11 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtPrice = txtPrice;
     }
 
+    public TextView getTxtFooterSpace() {
+        return txtFooterSpace;
+    }
+
+    public void setTxtFooterSpace(TextView txtFooterSpace) {
+        this.txtFooterSpace = txtFooterSpace;
+    }
 }

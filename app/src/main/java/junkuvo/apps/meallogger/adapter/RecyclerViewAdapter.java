@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.codetroopers.betterpickers.SharedPreferencesUtil;
 
 import java.text.SimpleDateFormat;
-import java.text.StringCharacterIterator;
 
 import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
@@ -34,15 +33,15 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 
     private Realm realm;
     private AlertDialog.Builder mAlertDialog;
-    private int mMealLogsLastPosition;
     private View mMealLogsRowView;
+
+    private int mLastPosition;
 
     public RecyclerViewAdapter(Context context, RealmResults<MealLogs> data) {
         super(context ,data, true);
         this.mContext = context;
-
+        mLastPosition = data.size();
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
-        mMealLogsLastPosition = data.size() - 1;
     }
 
     @Override
@@ -203,9 +202,11 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         holder.getImvThumbnail().setImageResource(mealLogs.getThumbnailResourceID());
         holder.getTxtPrice().setText(PriceUtil.parseLongToPrice(mealLogs.getPrice(),"¥"));
         holder.getTxtId().setText(String.valueOf(mealLogs.getId()));
-//        if(position == mMealLogsLastPosition){
-//            mMealLogsRowView.setPadding(0,0,0,mContext.getResources().getDimensionPixelSize(R.dimen.footer_padding_recyclerview));
-//        }
+        if(position == mLastPosition - 1) {
+            holder.getTxtFooterSpace().setVisibility(View.VISIBLE);
+        }else{
+            holder.getTxtFooterSpace().setVisibility(View.GONE);
+        }
     }
 
 //    /*
@@ -216,11 +217,12 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 //        return mItemList.size();
 //    }
 
-    public int getmMealLogsLastPosition() {
-        return mMealLogsLastPosition;
+
+    public int getmLastPosition() {
+        return mLastPosition;
     }
 
-    public void setmMealLogsLastPosition(int mMealLogsLastPosition) {
-        this.mMealLogsLastPosition = mMealLogsLastPosition;
+    public void setmLastPosition(int mLastPosition) {
+        this.mLastPosition = mLastPosition;
     }
 }

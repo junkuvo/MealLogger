@@ -12,6 +12,7 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    maven {url "https://clojars.org/repo/"}
 }
 
 apply plugin: 'realm-android'
@@ -51,4 +52,7 @@ dependencies {
         transitive = true;
     }
     compile 'com.github.florent37:tutoshowcase:1.0.0'
+
+    compile 'frankiesardo:icepick:3.1.0'
+    provided 'frankiesardo:icepick-processor:3.1.0'
 }

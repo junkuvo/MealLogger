@@ -18,6 +18,7 @@
     <string name="dialog_no">いいえ</string>
     <string name="dialog_register_title">何を食べましたか？</string>
     <string name="dialog_register_update_title">記録を変更しますか？</string>
+    <string name="dialog_add_same">"前回の食事を入力"</string>
     <string name="dialog_scheduler_title">記録タイミング</string>
     <string name="dialog_scheduler_message">タップで設定変更可能です</string>
     <string name="dialog_time_title">記録タイミング変更</string>
@@ -30,5 +31,12 @@
 
     <string name="dialog_log_cancel">キャンセル</string>
     <string name="dialog_log_create">完了</string>
+
+    <string name="dialog_back_no">いいえ</string>
+    <string name="dialog_back_yes">はい</string>
+    <string name="dialog_back_title">アプリを終了しますか？</string>
+
+    <string name="sample_data_title">記録は長押しで削除できます</string>
+    <string name="validation_message">食べたもの・値段を\n入力してください</string>
 
 </resources>

@@ -85,6 +85,9 @@ public class FragmentLogList extends Fragment {
                 // 合計金額を常に最新化
                 long sum = element.sum("price").longValue();
                 mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
+                if(mAdapter != null) {
+                    mAdapter.setmLastPosition(mItems.size());
+                }
             }
         });
         long sum = mItems.sum("price").longValue();
@@ -95,6 +98,5 @@ public class FragmentLogList extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
-
     }
 }
