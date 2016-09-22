@@ -115,7 +115,7 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                                                 .findAll();
 
                                 // TODO : これはUtilクラスに移殖
-                                String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtTitle)).getText().toString();
+                                String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtNotificationTitle)).getText().toString();
                                 Integer hour;
                                 int minute;
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

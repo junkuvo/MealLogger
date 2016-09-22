@@ -114,7 +114,7 @@ public class ActivityLogListAll extends AppCompatActivity
             }
         });
 
-        FloatingActionButton fab_setting = (FloatingActionButton) findViewById(R.id.fab_setting);
+        final FloatingActionButton fab_setting = (FloatingActionButton) findViewById(R.id.fab_setting);
         assert fab_setting != null;
 
         fab_setting.setOnClickListener(new View.OnClickListener() {
@@ -141,28 +141,40 @@ public class ActivityLogListAll extends AppCompatActivity
         getWindow().setBackgroundDrawableResource(R.color.colorBackground);
 
         final TutoShowcase tutoShowcase = TutoShowcase.from(this);
-        tutoShowcase.setContentView(R.layout.tutorial_notification)
-                .on(fab_setting)
-                .addCircle()
-                .onClick(new View.OnClickListener() {
+        tutoShowcase.setContentView(R.layout.tutorial_app_welcome)
+                .onClickContentView(R.id.txtNext, new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(View view) {
                         tutoShowcase.dismiss();
-                        final TutoShowcase tutoShowcase2 = TutoShowcase.from(ActivityLogListAll.this);
-                        tutoShowcase2.setContentView(R.layout.tutorial_add_log)
-                                .on(fab)
+                        final TutoShowcase tutoShowcaseNotification = TutoShowcase.from(ActivityLogListAll.this);
+                        tutoShowcaseNotification.setContentView(R.layout.tutorial_notification)
+                                .on(fab_setting)
                                 .addCircle()
                                 .onClick(new View.OnClickListener() {
                                     @Override
-                                    public void onClick(View view) {
-                                        tutoShowcase2.dismiss();
-                                        showNotificationScheduleDialog();
+                                    public void onClick(View v) {
+                                        tutoShowcaseNotification.dismiss();
+                                        final TutoShowcase tutoShowcaseAddLog = TutoShowcase.from(ActivityLogListAll.this);
+                                        tutoShowcaseAddLog.setContentView(R.layout.tutorial_add_log)
+                                                .on(fab)
+                                                .addCircle()
+                                                .onClick(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        tutoShowcaseAddLog.dismiss();
+                                                        showNotificationScheduleDialog();
+                                                    }
+                                                })
+                                                .show();
+//                                .showOnce(String.valueOf(R.layout.tutorial_add_log));
                                     }
                                 })
-                                .showOnce(String.valueOf(R.layout.tutorial_add_log));
+                                .show();
+//                .showOnce(String.valueOf(R.layout.tutorial_notification));
+
                     }
                 })
-                .showOnce(String.valueOf(R.layout.tutorial_notification));
+        .show();
 
         Intent intent = new Intent(ActivityLogListAll.this, NotificationService.class);
         intent.putExtra(INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(this,ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
@@ -223,6 +235,9 @@ public class ActivityLogListAll extends AppCompatActivity
     @Override
     public void onPause(){
         super.onPause();
+        if(mAlertDialog != null && mAlertDialog.isShowing()){
+            mAlertDialog.dismiss();
+        }
     }
 
     @Override
@@ -282,7 +297,7 @@ public class ActivityLogListAll extends AppCompatActivity
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
                     public void execute(Realm bgRealm) {
-                        String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtTitle)).getText().toString();
+                        String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtNotificationTitle)).getText().toString();
                         int hour;
                         int minute;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -435,9 +450,9 @@ public class ActivityLogListAll extends AppCompatActivity
             mAlertDialogBuilder.setNeutralButton(getString(R.string.dialog_add_same), null);
         }
 
-        final AlertDialog alertDialog = mAlertDialogBuilder.show();
+        mAlertDialog = mAlertDialogBuilder.show();
         mIsDialogShown = true;
-        Button buttonOK = alertDialog.getButton( DialogInterface.BUTTON_POSITIVE );
+        Button buttonOK = mAlertDialog.getButton( DialogInterface.BUTTON_POSITIVE );
         buttonOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -466,7 +481,7 @@ public class ActivityLogListAll extends AppCompatActivity
                             SharedPreferencesUtil.saveString(getApplicationContext(), PREF_KEY_MEAL_PRICE + mNotificationName, mPrice);
                             mMenuName = "";
                             mPrice = "";
-                            alertDialog.dismiss();
+                            mAlertDialog.dismiss();
                         }
                     }, new Realm.Transaction.OnError() {
                         @Override
@@ -479,7 +494,7 @@ public class ActivityLogListAll extends AppCompatActivity
             }
         });
 
-        Button buttonSameAsLastTime = alertDialog.getButton( DialogInterface.BUTTON_NEUTRAL );
+        Button buttonSameAsLastTime = mAlertDialog.getButton( DialogInterface.BUTTON_NEUTRAL );
         buttonSameAsLastTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

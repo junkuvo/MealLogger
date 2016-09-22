@@ -769,7 +769,7 @@ public class RecurrencePickerDialogFragment extends DialogFragment implements On
 //        }
         mTimePicker = (TimePicker)mView.findViewById(R.id.timePicker);
         mTimePicker.setIs24HourView(true);
-        mEdtTitle = (EditText)mView.findViewById(R.id.txtTitle);
+        mEdtTitle = (EditText)mView.findViewById(R.id.txtNotificationTitle);
         mInterval = (EditText) mView.findViewById(R.id.interval);
         mInterval.addTextChangedListener(new minMaxTextWatcher(1, INTERVAL_DEFAULT, INTERVAL_MAX) {
             @Override
