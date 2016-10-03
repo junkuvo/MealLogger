@@ -38,7 +38,6 @@ public class NotificationScheduler {
         int day = today;
         RealmResults<NotificationTime> items;
 
-
         realm = Realm.getDefaultInstance();
         // 今日
         mItems = realm.where(NotificationTime.class).contains("mDays", dayOfWeekString[today]).findAll().sort("mTime", Sort.ASCENDING);

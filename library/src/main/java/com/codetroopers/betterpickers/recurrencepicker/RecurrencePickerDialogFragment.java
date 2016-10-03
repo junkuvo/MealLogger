@@ -55,7 +55,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.codetroopers.betterpickers.R;
-import com.codetroopers.betterpickers.SharedPreferencesUtil;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 
 import java.text.DateFormatSymbols;

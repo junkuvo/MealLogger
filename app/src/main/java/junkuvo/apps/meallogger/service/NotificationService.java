@@ -1,7 +1,6 @@
 package junkuvo.apps.meallogger.service;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -10,7 +9,6 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import junkuvo.apps.meallogger.ActivityLogListAll;
-import junkuvo.apps.meallogger.Application;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.util.NotificationUtil;
@@ -83,7 +81,9 @@ public class NotificationService extends Service {
 
     private void handleOnStart(Intent intent, int startId) {
 //        startForeground(1, new Notification());
-        mNotificationName = intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
+        if(intent != null && intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME) != null) {
+            mNotificationName = intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
+        }
     }
 
     public class NotificationBinder extends Binder {

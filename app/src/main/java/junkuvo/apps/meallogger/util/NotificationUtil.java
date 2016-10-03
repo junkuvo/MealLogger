@@ -40,7 +40,7 @@ public class NotificationUtil {
             builder.addAction(R.drawable.ic_action_meal_done, "前回の「" + notificationName + "」と同じ", getPendingIntentWithBroadcast(context, NotificationEventReceiver.ADD_NOTIFICATION));
 //            builder.addAction(R.drawable.ic_stat, context.getString(R.string.notification_addNew), getPendingIntentWithBroadcast(context, NotificationEventReceiver.CLICK_NOTIFICATION));
             // Content text, which appears in smaller text below the title
-            builder.setSubText("この通知を下方向へスワイプすると操作を短縮できます");
+            builder.setSubText("この通知を下へスワイプすると操作を短縮できます");
         } else {
             // The subtext, which appears under the text on newer devices.
             // This will show-up in the devices with Android 4.2 and above only

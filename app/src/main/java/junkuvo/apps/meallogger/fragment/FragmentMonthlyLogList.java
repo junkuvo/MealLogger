@@ -3,7 +3,6 @@ package junkuvo.apps.meallogger.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,28 +10,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import junkuvo.apps.meallogger.R;
-import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
-import junkuvo.apps.meallogger.entity.MealLogs;
-import junkuvo.apps.meallogger.util.PriceUtil;
+import junkuvo.apps.meallogger.adapter.MonthlyRecyclerViewAdapter;
+import junkuvo.apps.meallogger.entity.MonthlyMealLog;
 import junkuvo.apps.meallogger.view.EllipseTextView;
 
-public class FragmentLogList extends Fragment {
+public class FragmentMonthlyLogList extends Fragment {
     private Realm realm;
 
     private Context mContext = null;
     private View mView;
-    private RecyclerFragmentListener mFragmentListener = null;
-
-    private AlertDialog.Builder mAlertDialog;
 
     // RecyclerViewとAdapter
     private RecyclerView mRecyclerView = null;
-    private RecyclerViewAdapter mAdapter = null;
-    private RealmResults<MealLogs> mItems;
+    private MonthlyRecyclerViewAdapter mAdapter = null;
 
     private EllipseTextView mEllipseTextView;
 
@@ -51,8 +43,8 @@ public class FragmentLogList extends Fragment {
         mEllipseTextView = (EllipseTextView) getActivity().findViewById(R.id.txtSumPrice);
         mView = inflater.inflate(R.layout.fragment_log_list, container, false);
 
-        realm = Realm.getDefaultInstance();
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
+        realm = Realm.getDefaultInstance();
 
         return mView;
     }
@@ -67,36 +59,19 @@ public class FragmentLogList extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mItems.removeChangeListeners();
         realm.close();
         realm = null;
     }
-//
-//    @NonNull
-//    protected RealmResults<MealLogs> buildTweetList(Realm realm) {
-//        return realm.allObjectsSorted(MealLogs.class, "createdAt", Sort.DESCENDING);
-//    }
 
-    private void setUpRecyclerView() {
-        mItems = realm.where(MealLogs.class).findAllSorted("createdAt", Sort.DESCENDING);
-        mItems.addChangeListener(new RealmChangeListener<RealmResults<MealLogs>>() {
-            @Override
-            public void onChange(RealmResults<MealLogs> element) {
-                // 合計金額を常に最新化
-                long sum = element.sum("price").longValue();
-                mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
-                if(mAdapter != null) {
-                    mAdapter.setmLastPosition(mItems.size());
-                }
-            }
-        });
-        long sum = mItems.sum("price").longValue();
-        mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
-
-//        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        mAdapter = new RecyclerViewAdapter(mContext, mItems);//new CardViewAdapter(mItems, itemTouchListener);
+    public void setUpRecyclerView() {
+        RealmResults monthlyLogs = realm.where(MonthlyMealLog.class).findAllAsync();
+        mAdapter = new MonthlyRecyclerViewAdapter(mContext, monthlyLogs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
+    }
+
+    public MonthlyRecyclerViewAdapter getmAdapter() {
+        return mAdapter;
     }
 }

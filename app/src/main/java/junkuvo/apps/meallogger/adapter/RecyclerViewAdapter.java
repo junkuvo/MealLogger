@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.codetroopers.betterpickers.SharedPreferencesUtil;
-
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
@@ -19,8 +19,10 @@ import io.realm.RealmResults;
 import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.entity.MealLogs;
+import junkuvo.apps.meallogger.entity.MonthlyMealLog;
 import junkuvo.apps.meallogger.util.NumberTextFormatter;
 import junkuvo.apps.meallogger.util.PriceUtil;
+import junkuvo.apps.meallogger.util.SharedPreferencesUtil;
 import junkuvo.apps.meallogger.view.ListRowViewHolder;
 
 public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, ListRowViewHolder> {
@@ -50,6 +52,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         LayoutInflater inflater = LayoutInflater.from(context);
         // Inflate the custom layout
         mMealLogsRowView = inflater.inflate(R.layout.list_row, null);
+        realm = Realm.getDefaultInstance();
 
         // Return a new holder instance
         ListRowViewHolder viewHolder = new ListRowViewHolder(mContext, mMealLogsRowView);
@@ -57,6 +60,8 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         mMealLogsRowView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 final long id = Long.parseLong(((TextView)v.findViewById(R.id.txtId)).getText().toString());
+                final int year = Integer.parseInt(((TextView)v.findViewById(R.id.txtYear)).getText().toString());
+                final int month = Integer.parseInt(((TextView)v.findViewById(R.id.txtMonth)).getText().toString());
                 String mealMenu = ((TextView) v.findViewById(R.id.txtMealMenu)).getText().toString();
                 String mealPrice = ((TextView) v.findViewById(R.id.txtPrice)).getText().toString();
 
@@ -75,19 +80,16 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                 mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_log_create), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, int which) {
-                        realm = Realm.getDefaultInstance();
                         realm.executeTransactionAsync(new Realm.Transaction() {
                             @Override
                             public void execute(Realm bgRealm) {
-                                final RealmResults<MealLogs> result =
-                                        bgRealm.where(MealLogs.class)
-                                                .equalTo("id", id)
-                                                .findAll();
+                                final RealmResults<MealLogs> result = bgRealm.where(MealLogs.class).equalTo("id", id).findAll();
 
                                 // TODO : これはUtilクラスに移殖
                                 String mealMenu = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
                                 String mealPrice = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
 
+                                // TODO : Updateはこれでいい？
                                 result.get(0).setMenuName(mealMenu);
                                 result.get(0).setPrice(PriceUtil.parsePriceToLong(mealPrice,"¥"));
                                 SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME,mealMenu);
@@ -96,6 +98,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
                             public void onSuccess() {
+                                updateMonthlyRealm(year, month);
                             }
                         }, new Realm.Transaction.OnError() {
                             @Override
@@ -106,7 +109,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                     }
                 });
                 mAlertDialog.setNegativeButton(mContext.getString(R.string.dialog_log_cancel), null);
-                mAlertDialog.setNeutralButton("削除", new DialogInterface.OnClickListener() {
+                mAlertDialog.setNeutralButton(mContext.getString(R.string.dialog_log_neutral), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -116,20 +119,17 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                         builder.setPositiveButton(mContext.getString(R.string.dialog_log_delete_yes), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                realm = Realm.getDefaultInstance();
                                 realm.executeTransactionAsync(new Realm.Transaction() {
                                     @Override
                                     public void execute(Realm bgRealm) {
                                         // realm はUIスレッドから変更できない
-                                        final RealmResults<MealLogs> result =
-                                                bgRealm.where(MealLogs.class)
-                                                        .equalTo("id", id)
-                                                        .findAll();
+                                        final RealmResults<MealLogs> result = bgRealm.where(MealLogs.class).equalTo("id", id).findAll();
                                         result.deleteFromRealm(0);
                                     }
                                 }, new Realm.Transaction.OnSuccess() {
                                     @Override
                                     public void onSuccess() {
+                                        updateMonthlyRealm(year, month);
                                     }
                                 }, new Realm.Transaction.OnError() {
                                     @Override
@@ -152,6 +152,8 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
             public boolean onLongClick(View v) {
 
                 final long id = Long.parseLong(((TextView) v.findViewById(R.id.txtId)).getText().toString());
+                final int year = Integer.parseInt(((TextView)v.findViewById(R.id.txtYear)).getText().toString());
+                final int month = Integer.parseInt(((TextView)v.findViewById(R.id.txtMonth)).getText().toString());
                 // Handle long click
                 mAlertDialog = new AlertDialog.Builder(mContext);
                 mAlertDialog.setTitle(mContext.getString(R.string.dialog_title));
@@ -160,20 +162,22 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                 mAlertDialog.setPositiveButton(mContext.getString(R.string.dialog_log_delete_yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        realm = Realm.getDefaultInstance();
                         realm.executeTransactionAsync(new Realm.Transaction() {
                             @Override
                             public void execute(Realm bgRealm) {
                                 // realm はUIスレッドから変更できない
-                                final RealmResults<MealLogs> result =
-                                        bgRealm.where(MealLogs.class)
-                                                .equalTo("id", id)
-                                                .findAll();
+                                RealmResults<MealLogs> result = bgRealm.where(MealLogs.class).equalTo("id", id).findAll();
                                 result.deleteFromRealm(0);
                             }
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
                             public void onSuccess() {
+                                updateMonthlyRealm(year, month);
+//                                long sum;
+//                                RealmResults mealLogsForSum = realm.where(MealLogs.class).equalTo("month", month).equalTo("year", year).findAll();
+//                                sum = mealLogsForSum.sum("price").longValue();
+//                                MonthlyMealLog monthlyMealLogToUpdate = new MonthlyMealLog();
+//                                monthlyMealLogToUpdate.setMonthlyMealLog(year, month, sum);
                             }
                         }, new Realm.Transaction.OnError() {
                             @Override
@@ -207,6 +211,21 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         }else{
             holder.getTxtFooterSpace().setVisibility(View.GONE);
         }
+
+        Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
+        calendar.setTime(mealLogs.getCreatedAt());   // assigns calendar to given date
+        int hour = calendar.get(Calendar.HOUR_OF_DAY); // gets hour in 24h format
+        if(hour >= 5 && hour < 10){
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_morning);
+        }else if(hour >= 10 && hour < 15) {
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_noon);
+        }else if(hour >= 15 && hour < 18){
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_evening);
+        }else{
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_night);
+        }
+        holder.getTxtYear().setText(String.valueOf(mealLogs.getYear()));
+        holder.getTxtMonth().setText(String.valueOf(mealLogs.getMonth()));
     }
 
 //    /*
@@ -224,5 +243,32 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
 
     public void setmLastPosition(int mLastPosition) {
         this.mLastPosition = mLastPosition;
+    }
+
+    public void updateMonthlyRealm(final int year, final int month){
+        long sum;
+        RealmResults mealLogsForSum = realm.where(MealLogs.class).equalTo("month", month).equalTo("year", year).findAll();
+        sum = mealLogsForSum.sum("price").longValue();
+        final MonthlyMealLog monthlyMealLogToUpdate = new MonthlyMealLog();
+        monthlyMealLogToUpdate.setMonthlyMealLog(year, month, sum);
+        // AsyncによってUIスレッドとは別スレッドで処理
+        // execute中身はなるべく軽く
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                // TODO : 編集した月を指定
+                realm.where(MonthlyMealLog.class).equalTo("month", month).equalTo("year", year).findAll().deleteAllFromRealm();
+                realm.insert(monthlyMealLogToUpdate);
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+            }
+        }, new Realm.Transaction.OnError() {
+            @Override
+            public void onError(Throwable error) {
+                error.printStackTrace();
+            }
+        });
     }
 }

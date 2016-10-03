@@ -3,6 +3,7 @@ package junkuvo.apps.meallogger.view;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import junkuvo.apps.meallogger.R;
@@ -17,6 +18,7 @@ public class TimerListRowViewHolder extends RecyclerView.ViewHolder {
     protected TextView txtTitle;
     protected TextView txtTime;
     protected TextView txtDays;
+    protected ImageView imgNotificationIcon;
 
     public TimerListRowViewHolder(Context context, View view) {
         super(view);
@@ -25,6 +27,7 @@ public class TimerListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtTime = (TextView)view.findViewById(R.id.txtTime);
         this.txtId = (TextView)view.findViewById(R.id.txtId);
         this.txtDays = (TextView)view.findViewById(R.id.txtDays);
+        this.imgNotificationIcon = (ImageView)view.findViewById(R.id.imgNotificationIcon);
     }
 
     public TextView getTxtId() {
@@ -57,5 +60,13 @@ public class TimerListRowViewHolder extends RecyclerView.ViewHolder {
 
     public void setTxtDays(TextView txtDays) {
         this.txtDays = txtDays;
+    }
+
+    public ImageView getImgNotificationIcon() {
+        return imgNotificationIcon;
+    }
+
+    public void setImgNotificationIcon(ImageView imgNotificationIcon) {
+        this.imgNotificationIcon = imgNotificationIcon;
     }
 }

@@ -1,7 +1,12 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">メシ録</string>
 
-    <string name="page1_title">食事の記録</string>
+    <string name="page1_title">毎日の記録</string>
+    <string name="page2_title">毎月の記録</string>
+
+    <string name="initial_notification_morning">朝</string>
+    <string name="initial_notification_evening">昼</string>
+    <string name="initial_notification_night">夜</string>
 
     <string name="dialog_log_delete_yes">はい</string>
     <string name="dialog_log_delete_no">いいえ</string>
@@ -18,7 +23,7 @@
     <string name="dialog_no">いいえ</string>
     <string name="dialog_register_title">何を食べましたか？</string>
     <string name="dialog_register_update_title">記録を変更しますか？</string>
-    <string name="dialog_add_same">"前回の食事を入力"</string>
+    <string name="dialog_add_same">"前回の%1$sを入力"</string>
     <string name="dialog_scheduler_title">記録タイミング</string>
     <string name="dialog_scheduler_message">タップで設定変更可能です</string>
     <string name="dialog_time_title">記録タイミング変更</string>
@@ -31,6 +36,7 @@
 
     <string name="dialog_log_cancel">キャンセル</string>
     <string name="dialog_log_create">完了</string>
+    <string name="dialog_log_neutral">削除</string>
 
     <string name="dialog_back_no">いいえ</string>
     <string name="dialog_back_yes">はい</string>

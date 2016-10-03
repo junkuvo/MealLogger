@@ -20,6 +20,10 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
     protected TextView txtPrice;
     protected TextView txtId;
     protected TextView txtFooterSpace;
+    protected ImageView imgNotificationIcon;
+
+    protected TextView txtYear;
+    protected TextView txtMonth;
 
     public ListRowViewHolder(Context context, View view) {
         super(view);
@@ -30,6 +34,9 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtPrice = (TextView) view.findViewById(R.id.txtPrice);
         this.txtId = (TextView)view.findViewById(R.id.txtId);
         this.txtFooterSpace = (TextView)view.findViewById(R.id.txtFooterSpace);
+        this.imgNotificationIcon = (ImageView)view.findViewById(R.id.imgNotificationIcon);
+        this.txtYear = (TextView)view.findViewById(R.id.txtYear);
+        this.txtMonth = (TextView)view.findViewById(R.id.txtMonth);
     }
 
     public TextView getTxtId() {
@@ -78,5 +85,29 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
 
     public void setTxtFooterSpace(TextView txtFooterSpace) {
         this.txtFooterSpace = txtFooterSpace;
+    }
+
+    public ImageView getImgNotificationIcon() {
+        return imgNotificationIcon;
+    }
+
+    public void setImgNotificationIcon(ImageView imgNotificationIcon) {
+        this.imgNotificationIcon = imgNotificationIcon;
+    }
+
+    public TextView getTxtYear() {
+        return txtYear;
+    }
+
+    public void setTxtYear(TextView txtYear) {
+        this.txtYear = txtYear;
+    }
+
+    public TextView getTxtMonth() {
+        return txtMonth;
+    }
+
+    public void setTxtMonth(TextView txtMonth) {
+        this.txtMonth = txtMonth;
     }
 }

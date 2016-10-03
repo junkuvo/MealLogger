@@ -66,6 +66,7 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
         LayoutInflater inflater = LayoutInflater.from(context);
         // Inflate the custom layout
         View rowView = inflater.inflate(R.layout.time_list_row, null);
+        realm = Realm.getDefaultInstance();
 
         // Return a new holder instance
         TimerListRowViewHolder viewHolder = new TimerListRowViewHolder(mContext, rowView);
@@ -104,7 +105,6 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                 rpd.setOnOkBtnClickListener(new RecurrencePickerDialogFragment.OnOkBtnClickListener() {
                     @Override
                     public void onOkClicked(final View view) {
-                        realm = Realm.getDefaultInstance();
                         realm.executeTransactionAsync(new Realm.Transaction() {
                             @Override
                             public void execute(Realm bgRealm) {
@@ -219,9 +219,19 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
         String hour = time.split(":")[0];
         String minute = time.split(":")[1];
 
-        holder.getTxtTime().setText(String.valueOf(hour) + ":" + String.valueOf(minute));
+        holder.getTxtTime().setText(hour + ":" + minute);
         holder.getTxtDays().setText(notificationTime.getmDays());
         holder.getTxtId().setText(String.valueOf(notificationTime.getId()));
+
+        if(Integer.parseInt(hour) >= 5 && Integer.parseInt(hour) < 10){
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_morning);
+        }else if(Integer.parseInt(hour) >= 10 && Integer.parseInt(hour) < 15) {
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_noon);
+        }else if(Integer.parseInt(hour) >= 15 && Integer.parseInt(hour) < 18){
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_evening);
+        }else{
+            holder.getImgNotificationIcon().setImageResource(R.drawable.ic_night);
+        }
     }
 
     /*

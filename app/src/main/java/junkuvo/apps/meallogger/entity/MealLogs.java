@@ -1,9 +1,12 @@
 package junkuvo.apps.meallogger.entity;
 
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class MealLogs extends RealmObject {
@@ -15,6 +18,10 @@ public class MealLogs extends RealmObject {
     private String menuName;
     private int thumbnailResourceID;
     private long price;
+    @Index
+    private int month;
+    @Index
+    private int year;
 
     public MealLogs() {
     }
@@ -67,11 +74,33 @@ public class MealLogs extends RealmObject {
         this.price = price;
     }
 
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
     public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, long price){
         setId(System.currentTimeMillis());
         setMenuName(menuName);
         setPrice(price);
         setThumbnailResourceID(thumbnailResourceID);
         setCreatedAt(createdAt);
+
+        Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
+        calendar.setTime(createdAt);   // assigns calendar to given date
+
+        setMonth(calendar.get(Calendar.MONTH) + 1);
+        setYear(calendar.get(Calendar.YEAR));
     }
 }
