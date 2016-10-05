@@ -1,96 +1,30 @@
 package junkuvo.apps.meallogger;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
-import android.widget.Toast;
+import android.support.v4.app.FragmentActivity;
+import android.view.WindowManager;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
-import junkuvo.apps.meallogger.adapter.RecyclerViewAdapter;
-import junkuvo.apps.meallogger.entity.MealLogs;
+import junkuvo.apps.meallogger.fragment.FragmentAlertDialog;
 
-public class ActivityLogRegister extends AppCompatActivity implements RecyclerView.OnItemTouchListener {
-//    private CardViewAdapter mAdapter;
-
-//    private ArrayList<String> mItems;
-
-
-    private Realm realm;
-
-    // RecyclerViewとAdapter
-    private RecyclerView mRecyclerView = null;
-    private RecyclerViewAdapter mAdapter = null;
-    private RealmResults<MealLogs> mItems;
+public class ActivityLogRegister extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_log_list);
-
-        realm = Realm.getDefaultInstance();
-        mItems = realm.where(MealLogs.class).findAllAsync();
-
-        mAdapter = new RecyclerViewAdapter(this, mItems);//new CardViewAdapter(mItems, itemTouchListener);
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.addOnItemTouchListener(this);
-
-//        SwipeableRecyclerViewTouchListener swipeTouchListener =
-//                new SwipeableRecyclerViewTouchListener(recyclerView,
-//                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
-//                            @Override
-//                            public boolean canSwipeLeft(int position) {
-//                                return true;
-//                            }
-//
-//                            @Override
-//                            public boolean canSwipeRight(int position) {
-//                                return true;
-//                            }
-//
-//                            @Override
-//                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
-//                                for (int position : reverseSortedPositions) {
-////                                    Toast.makeText(MainActivity.this, mItems.get(position) + " swiped left", Toast.LENGTH_SHORT).show();
-//                                    mItems.remove(position);
-//                                    mAdapter.notifyItemRemoved(position);
-//                                }
-//                                mAdapter.notifyDataSetChanged();
-//                            }
-//
-//                            @Override
-//                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
-//                                for (int position : reverseSortedPositions) {
-////                                    Toast.makeText(MainActivity.this, mItems.get(position) + " swiped right", Toast.LENGTH_SHORT).show();
-//                                    mItems.remove(position);
-//                                    mAdapter.notifyItemRemoved(position);
-//                                }
-//                                mAdapter.notifyDataSetChanged();
-//                            }
-//                        });
-//
-//        recyclerView.addOnItemTouchListener(swipeTouchListener);
-    }
-
-
-    @Override
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        return false;
+        getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        FragmentAlertDialog fragment = new FragmentAlertDialog();
+        String notificationName = getIntent().getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
+        Bundle bundle = new Bundle();
+        bundle.putString(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, notificationName);
+        fragment.setArguments(bundle);
+        fragment.show(getFragmentManager(),"ActivityLogRegister");
     }
 
     @Override
-    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        Toast.makeText(getApplicationContext(),"test", Toast.LENGTH_SHORT).show();
+    protected void onDestroy(){
+        super.onDestroy();
     }
 
-    @Override
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-    }
 }

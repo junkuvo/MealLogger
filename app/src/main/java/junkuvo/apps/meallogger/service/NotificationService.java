@@ -1,16 +1,12 @@
 package junkuvo.apps.meallogger.service;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import junkuvo.apps.meallogger.ActivityLogListAll;
 import junkuvo.apps.meallogger.R;
-import junkuvo.apps.meallogger.receiver.NotificationEventReceiver;
 import junkuvo.apps.meallogger.util.NotificationUtil;
 
 public class NotificationService extends Service {
@@ -18,10 +14,6 @@ public class NotificationService extends Service {
     private final NotificationService self = this;
 
     private Context mContext;
-    private AlarmManager mAlarmManager;
-    private PendingIntent mAlarmIntent;
-    private NotificationEventReceiver mNotificationEventReceiver;
-    private String mNotificationName;
 
     @Override
     public void onCreate() {
@@ -38,36 +30,18 @@ public class NotificationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         handleOnStart(intent,startId);
-//        Toast.makeText(mContext, "onStartCommand called by "
-//                + Thread.currentThread().getName(), Toast.LENGTH_LONG).show();
-
-
-
-//            mHandler.postDelayed(new Runnable() {
-//                public void run() {
-//                    showTimerDoneNotification();
-//                }
-//            }, 10000);
-
-
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mNotificationEventReceiver != null) {
-            unregisterReceiver(mNotificationEventReceiver);
-        }
     }
 
     // BindしたServiceをActivityに返す
     @Override
     public IBinder onBind(Intent intent) {
-        NotificationUtil notificationUtil = new NotificationUtil();
-        startForeground(R.string.app_name, notificationUtil.createNotification(mContext));
-
-        return new NotificationBinder();
+        return null;//new NotificationBinder();
     }
 
     @Override
@@ -80,10 +54,8 @@ public class NotificationService extends Service {
     }
 
     private void handleOnStart(Intent intent, int startId) {
-//        startForeground(1, new Notification());
-        if(intent != null && intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME) != null) {
-            mNotificationName = intent.getStringExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
-        }
+        NotificationUtil notificationUtil = new NotificationUtil();
+        startForeground(R.string.app_name, notificationUtil.createNotification(mContext));
     }
 
     public class NotificationBinder extends Binder {

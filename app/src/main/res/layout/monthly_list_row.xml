@@ -30,14 +30,14 @@
             <TextView
                 android:id="@+id/txtMonth"
                 android:layout_width="wrap_content"
-                android:layout_height="80dp"
+                android:layout_height="match_parent"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:text="2016/1"
                 android:textSize="24dp"
                 android:textColor="#222"
                 android:gravity="top|left"
-                android:layout_margin="8dp" />
+                android:layout_margin="12dp" />
 
             <TextView
                 android:id="@+id/txtMonthlyPrice"

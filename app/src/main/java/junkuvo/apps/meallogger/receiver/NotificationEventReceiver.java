@@ -13,6 +13,7 @@ import java.util.Date;
 
 import io.realm.Realm;
 import junkuvo.apps.meallogger.ActivityLogListAll;
+import junkuvo.apps.meallogger.ActivityLogRegister;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.entity.MealLogs;
 import junkuvo.apps.meallogger.util.NotificationScheduler;
@@ -49,9 +50,13 @@ public class NotificationEventReceiver extends BroadcastReceiver {
             case ACTION_ALARM:
                 Bundle bundle = intent.getExtras();
                 mNotificationName = bundle.getString(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
-                mNotificationUtil.showTimerDoneNotification(mContext, mNotificationName);
-                // 今回のNotificationの名前を保存しIDとして次の時にメニューと金額を利用する
-                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationName);
+                Intent dialogIntent = new Intent(context, ActivityLogRegister.class);
+                dialogIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, mNotificationName);
+                context.startActivity(dialogIntent);
+
+//                mNotificationUtil.showTimerDoneNotification(mContext, mNotificationName);
+//                // 今回のNotificationの名前を保存しIDとして次の時にメニューと金額を利用する
+//                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationName);
                 break;
 
             case ADD_NOTIFICATION: // 前回と同じ

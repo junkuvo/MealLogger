@@ -2,14 +2,11 @@ package junkuvo.apps.meallogger;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -206,7 +203,7 @@ public class ActivityLogListAll extends AppCompatActivity
         // アプリのプロセス自体が消えるとアラームが実行されないのでサービスにしておく
         // 一度設定したアラームはプロセスを消すと消える
         startService(intent);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+//        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -251,6 +248,10 @@ public class ActivityLogListAll extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == MENU_SETTING_ID) {
+            Intent dialogIntent = new Intent(this, ActivityLogRegister.class);
+//                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, dialogIntent, 0);
+            this.startActivity(dialogIntent);
+
             return true;
         }
 
@@ -268,32 +269,9 @@ public class ActivityLogListAll extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        killAlertService();
         realm.close();
         realm = null;
     }
-
-    public void killAlertService() {
-        unbindService(mServiceConnection); // バインド解除
-        mNotificationService.stopSelf(); // サービスは必要ないので終了させる。
-        mServiceConnection = null;
-        mNotificationService = null;
-    }
-
-    private NotificationService mNotificationService;
-
-    // ServiceとActivityをBindするクラス
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mNotificationService = ((NotificationService.NotificationBinder) service).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            mNotificationService = null;
-        }
-    };
 
     @Override
     public void onRecurrenceSet(String rrule) {
@@ -481,6 +459,7 @@ public class ActivityLogListAll extends AppCompatActivity
 
         mAlertDialog = mAlertDialogBuilder.show();
         mIsDialogShown = true;
+        // タップしても閉じないようにsetPositiveButtonでなくgetButton使う
         Button buttonOK = mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         buttonOK.setOnClickListener(new View.OnClickListener() {
             @Override

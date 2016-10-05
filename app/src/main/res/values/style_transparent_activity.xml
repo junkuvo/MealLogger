@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Transparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        // ステータスバーを透明にする
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <!-- 呼び出される activity の Enter アニメーション -->
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <!-- 他の activity を呼び出す activity の Exit アニメーション -->
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <!-- 他の activity を閉じる際に表示される activity の Enter アニメーション -->
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <!-- activity を閉じる際の Exit アニメーション -->
+        <item name="android:activityCloseExitAnimation">@null</item>
+
+    </style>
+</resources>
