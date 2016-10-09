@@ -12,7 +12,6 @@ import io.realm.annotations.PrimaryKey;
 public class MealLogs extends RealmObject {
     @PrimaryKey
     private long id;
-//    @Required
     private Date createdAt;
     private String screenName;
     private String menuName;
@@ -22,6 +21,7 @@ public class MealLogs extends RealmObject {
     private int month;
     @Index
     private int year;
+    private String notificationName;
 
     public MealLogs() {
     }
@@ -90,12 +90,21 @@ public class MealLogs extends RealmObject {
         this.year = year;
     }
 
-    public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, long price){
+    public String getNotificationName() {
+        return notificationName;
+    }
+
+    public void setNotificationName(String notificationName) {
+        this.notificationName = notificationName;
+    }
+
+    public void setMealLog(int thumbnailResourceID, String menuName, Date createdAt, long price, String notificationName) {
         setId(System.currentTimeMillis());
         setMenuName(menuName);
         setPrice(price);
         setThumbnailResourceID(thumbnailResourceID);
         setCreatedAt(createdAt);
+        setNotificationName(notificationName);
 
         Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
         calendar.setTime(createdAt);   // assigns calendar to given date

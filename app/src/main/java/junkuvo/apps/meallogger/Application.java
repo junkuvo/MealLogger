@@ -46,6 +46,14 @@ public class Application extends android.app.Application {
                         .addField("month", int.class, FieldAttribute.INDEXED);
                 oldVersion++;
             }
+
+            // version 2 to version 3
+            // added year and month in MealLogs TBL
+            if(oldVersion == 2L){
+                schema.get("MealLogs")
+                        .addField("notificationName", String.class);
+                oldVersion++;
+            }
         }
     }
 }

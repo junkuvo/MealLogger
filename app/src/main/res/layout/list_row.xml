@@ -47,10 +47,22 @@
                 android:src="@mipmap/ic_launcher" />
 
             <TextView
-                android:id="@+id/txtMealMenu"
-                android:layout_width="match_parent"
+                android:id="@+id/txtNotificationName"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/imvThumbnail"
+                android:maxLines="1"
+                android:padding="4dp"
+                android:text=""
+                android:ellipsize="end"
+                android:textColor="#222"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/txtMealMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/txtNotificationName"
                 android:maxLines="1"
                 android:padding="4dp"
                 android:text=""
@@ -62,8 +74,8 @@
                 android:id="@+id/txtMealDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/txtMealMenu"
-                android:layout_alignLeft="@+id/txtMealMenu"
+                android:layout_below="@+id/txtNotificationName"
+                android:layout_alignLeft="@+id/txtNotificationName"
                 android:maxLines="1"
                 android:padding="4dp"
                 android:text=""

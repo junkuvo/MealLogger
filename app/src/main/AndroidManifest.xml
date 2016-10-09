@@ -36,6 +36,7 @@
                 <!--定義したactionを追記する-->
                 <action android:name="ALARM" />
                 <action android:name="add" />
+                <action android:name="add_dialog" />
                 <action android:name="click_notification" />
                 <action android:name="delete_notification" />
                 <action android:name="click_service_notification" />

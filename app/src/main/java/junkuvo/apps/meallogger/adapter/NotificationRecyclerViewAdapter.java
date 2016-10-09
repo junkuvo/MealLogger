@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Time;
 import android.view.LayoutInflater;
@@ -101,18 +102,13 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                 rpd = new RecurrencePickerDialogFragment();
                 rpd.setArguments(bundle);
                 rpd.setOnRecurrenceSetListener(NotificationRecyclerViewAdapter.this);
-                // TODO : OKボタンのイベントを登録＋レコードをUpdate
                 rpd.setOnOkBtnClickListener(new RecurrencePickerDialogFragment.OnOkBtnClickListener() {
                     @Override
                     public void onOkClicked(final View view) {
                         realm.executeTransactionAsync(new Realm.Transaction() {
                             @Override
                             public void execute(Realm bgRealm) {
-                                // realm はUIスレッドから変更できない
-                                final RealmResults<NotificationTime> result =
-                                        bgRealm.where(NotificationTime.class)
-                                                .equalTo("id", id)
-                                                .findAll();
+                                final RealmResults<NotificationTime> result = bgRealm.where(NotificationTime.class).equalTo("id", id).findAll();
 
                                 // TODO : これはUtilクラスに移殖
                                 String notificationTitle = ((EditText)view.findViewById(com.codetroopers.betterpickers.R.id.txtNotificationTitle)).getText().toString();
@@ -207,6 +203,9 @@ public class NotificationRecyclerViewAdapter extends RealmRecyclerViewAdapter<No
                 return true;
             }
         });
+
+        // なぜかここで指定しないと中途半端な幅になる
+        rowView.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         return viewHolder;
     }

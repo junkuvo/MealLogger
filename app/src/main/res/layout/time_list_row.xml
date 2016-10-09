@@ -31,7 +31,10 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_morning"
-                android:layout_margin="8dp" />
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"/>
 
             <TextView
                 android:id="@+id/txtTitle"
@@ -40,7 +43,10 @@
                 android:text=""
                 android:singleLine="true"
                 android:textColor="#222"
-                android:layout_margin="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
                 android:layout_toRightOf="@+id/imgNotificationIcon"
                 android:textSize="15dp" />
 
@@ -52,7 +58,7 @@
                 android:singleLine="true"
                 android:textColor="#222"
                 android:textSize="15dp"
-                android:layout_marginLeft="8dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginBottom="8dp"
                 android:layout_below="@+id/txtTitle"
                 android:layout_toRightOf="@+id/imgNotificationIcon" />
@@ -61,7 +67,7 @@
                 android:id="@+id/txtDays"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
+                android:padding="8dp"
                 android:text=""
                 android:singleLine="true"
                 android:textColor="#222"

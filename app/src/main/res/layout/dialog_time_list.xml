@@ -2,14 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:layout_gravity="center"
+    android:layout_gravity="right"
+    android:gravity="right"
     android:orientation="vertical">
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackground"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" />
 
+    <CheckBox
+        android:id="@+id/chkDialogNotify"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:text="ダイアログでの通知を表示しない" />
 </LinearLayout>

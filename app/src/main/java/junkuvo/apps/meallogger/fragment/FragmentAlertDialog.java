@@ -22,6 +22,9 @@ import junkuvo.apps.meallogger.util.NumberTextFormatter;
 import junkuvo.apps.meallogger.util.PriceUtil;
 import junkuvo.apps.meallogger.util.SharedPreferencesUtil;
 
+import static junkuvo.apps.meallogger.ActivityLogListAll.PREF_KEY_MEAL_NAME;
+import static junkuvo.apps.meallogger.ActivityLogListAll.PREF_KEY_MEAL_PRICE;
+
 public class FragmentAlertDialog extends DialogFragment {
 
     Realm realm;
@@ -34,11 +37,15 @@ public class FragmentAlertDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         final View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_log_register, null);
+        final EditText mealText = (EditText) view.findViewById(R.id.edtMealMenu);
         // TODO : カスタムビューにしたいな
         final EditText priceText = (EditText) view.findViewById(R.id.edtMealPrice);
         priceText.addTextChangedListener(new NumberTextFormatter(priceText, "#,###"));
 
         builder.setView(view);
+        if(SharedPreferencesUtil.getString(getActivity(), PREF_KEY_MEAL_NAME + notificationName) != null){
+            builder.setNeutralButton(getString(R.string.dialog_add_same, notificationName), null);
+        }
         builder.setPositiveButton(getString(R.string.dialog_log_create), null);
         builder.setNegativeButton(getString(R.string.dialog_log_cancel), null);
         realm = Realm.getDefaultInstance();
@@ -48,18 +55,29 @@ public class FragmentAlertDialog extends DialogFragment {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(final DialogInterface dialog) {                    //
+                Button buttonSameAsLastTime = ((AlertDialog)dialog).getButton( DialogInterface.BUTTON_NEUTRAL );
+                buttonSameAsLastTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String mealName = SharedPreferencesUtil.getString(getActivity(), PREF_KEY_MEAL_NAME + notificationName);
+                        String price = SharedPreferencesUtil.getString(getActivity(), PREF_KEY_MEAL_PRICE + notificationName);
+                        mealText.setText(mealName);
+                        priceText.setText(price);
+                    }
+                });
+
                 Button buttonOK = ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
                 buttonOK.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final String mealName = ((EditText) view.findViewById(R.id.edtMealMenu)).getText().toString();
-                        final String price = ((EditText) view.findViewById(R.id.edtMealPrice)).getText().toString();
+                        final String mealName = mealText.getText().toString();
+                        final String price = priceText.getText().toString();
                         // 入力が空の場合
                         if (mealName.equals("") || price.equals("")) {
                             Toast.makeText(getActivity(), getString(R.string.validation_message), Toast.LENGTH_LONG).show();
                         } else {
                             final MealLogs mealLogToInsert = new MealLogs();
-                            mealLogToInsert.setMealLog(R.mipmap.ic_launcher, mealName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price, "¥"));
+                            mealLogToInsert.setMealLog(R.mipmap.ic_launcher, mealName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price, "¥"), notificationName);
                             realm.executeTransactionAsync(new Realm.Transaction() {
                                 @Override
                                 public void execute(Realm bgRealm) {
@@ -70,8 +88,8 @@ public class FragmentAlertDialog extends DialogFragment {
                                 @Override
                                 public void onSuccess() {
                                     // トランザクションは成功
-                                    SharedPreferencesUtil.saveString(getActivity().getBaseContext(), ActivityLogListAll.PREF_KEY_MEAL_NAME + notificationName, mealName);
-                                    SharedPreferencesUtil.saveString(getActivity().getBaseContext(), ActivityLogListAll.PREF_KEY_MEAL_PRICE + notificationName, price);
+                                    SharedPreferencesUtil.saveString(getActivity().getBaseContext(), PREF_KEY_MEAL_NAME + notificationName, mealName);
+                                    SharedPreferencesUtil.saveString(getActivity().getBaseContext(), PREF_KEY_MEAL_PRICE + notificationName, price);
                                     dialog.dismiss();
 
                                     final int year = mealLogToInsert.getYear();
@@ -114,9 +132,9 @@ public class FragmentAlertDialog extends DialogFragment {
             }
         });
 
-
 //        dialog.setCanceledOnTouchOutside(true);
 
+        dialog.getWindow().getAttributes().windowAnimations = R.style.FadeInOutDialogAnimation;
         return dialog;
     }
 

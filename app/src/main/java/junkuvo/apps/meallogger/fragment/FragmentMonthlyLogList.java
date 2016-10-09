@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import junkuvo.apps.meallogger.R;
 import junkuvo.apps.meallogger.adapter.MonthlyRecyclerViewAdapter;
 import junkuvo.apps.meallogger.entity.MonthlyMealLog;
@@ -64,7 +65,7 @@ public class FragmentMonthlyLogList extends Fragment {
     }
 
     public void setUpRecyclerView() {
-        RealmResults monthlyLogs = realm.where(MonthlyMealLog.class).findAllAsync();
+        RealmResults monthlyLogs = realm.where(MonthlyMealLog.class).findAllAsync().sort("year", Sort.DESCENDING).sort("month", Sort.DESCENDING);
         mAdapter = new MonthlyRecyclerViewAdapter(mContext, monthlyLogs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);

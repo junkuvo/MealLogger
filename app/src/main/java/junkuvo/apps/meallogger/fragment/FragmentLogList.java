@@ -3,10 +3,13 @@ package junkuvo.apps.meallogger.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,26 +28,20 @@ public class FragmentLogList extends Fragment {
 
     private Context mContext = null;
     private View mView;
-    private RecyclerFragmentListener mFragmentListener = null;
 
-    private AlertDialog.Builder mAlertDialog;
-
-    // RecyclerViewとAdapter
     private RecyclerView mRecyclerView = null;
     private RecyclerViewAdapter mAdapter = null;
     private RealmResults<MealLogs> mItems;
 
     private EllipseTextView mEllipseTextView;
 
-    public interface RecyclerFragmentListener {
-        void onRecyclerEvent();
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
     }
+
+    SearchView mSearchView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,8 +57,33 @@ public class FragmentLogList extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        setHasOptionsMenu(true);
+        selectMealLogsFromRealm();
         setUpRecyclerView();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.menu, menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        mSearchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search_menu_search_view));
+        mSearchView.setIconifiedByDefault(true);
+        mSearchView.setQueryHint(getString(R.string.app_search_hint));
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != "") {
+                    selectMealLogsFromRealm(newText);
+                    setUpRecyclerView();
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -71,29 +93,37 @@ public class FragmentLogList extends Fragment {
         realm.close();
         realm = null;
     }
-//
-//    @NonNull
-//    protected RealmResults<MealLogs> buildTweetList(Realm realm) {
-//        return realm.allObjectsSorted(MealLogs.class, "createdAt", Sort.DESCENDING);
-//    }
+
+    private void selectMealLogsFromRealm(String searchWord) {
+        mItems = realm.where(MealLogs.class)
+                .contains("notificationName", searchWord)
+                .or()
+                .contains("menuName", searchWord)
+                .findAllSorted("createdAt", Sort.DESCENDING);
+    }
+
+    private void selectMealLogsFromRealm() {
+        mItems = realm.where(MealLogs.class).findAllSorted("createdAt", Sort.DESCENDING);
+    }
 
     private void setUpRecyclerView() {
-        mItems = realm.where(MealLogs.class).findAllSorted("createdAt", Sort.DESCENDING);
         mItems.addChangeListener(new RealmChangeListener<RealmResults<MealLogs>>() {
             @Override
             public void onChange(RealmResults<MealLogs> element) {
                 // 合計金額を常に最新化
                 long sum = element.sum("price").longValue();
-                mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
-                if(mAdapter != null) {
+                mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum, "¥"));
+                if (mAdapter != null) {
                     mAdapter.setmLastPosition(mItems.size());
                 }
             }
         });
         long sum = mItems.sum("price").longValue();
-        mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum,"¥"));
+        mEllipseTextView.setText(PriceUtil.parseLongToPrice(sum, "¥"));
 
-//        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        if (mAdapter != null) {
+            mAdapter = null;
+        }
         mAdapter = new RecyclerViewAdapter(mContext, mItems);//new CardViewAdapter(mItems, itemTouchListener);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);

@@ -105,7 +105,7 @@ public class NotificationUtil {
         // This will show-up in the devices with Android 4.2 and above only
         builder.setSubText(context.getString(R.string.notification_subMessage));
 
-        // ロックスクリーン上でどう見えるか(SECRETにしても表示される。。。？)
+        // ロックスクリーン上でどう見えるか
         builder.setVisibility(Notification.VISIBILITY_SECRET);
 
         // PRIORITY_MINだとどこにも表示されなくなる

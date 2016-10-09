@@ -4,6 +4,8 @@
     <string name="page1_title">毎日の記録</string>
     <string name="page2_title">毎月の記録</string>
 
+    <string name="app_search_hint">通知名 or 食事名</string>
+
     <string name="initial_notification_morning">朝</string>
     <string name="initial_notification_evening">昼</string>
     <string name="initial_notification_night">夜</string>

@@ -29,6 +29,7 @@ public class NotificationEventReceiver extends BroadcastReceiver {
 
     public static final String ACTION_ALARM = "ALARM";
     public static final String ADD_NOTIFICATION = "add";
+    public static final String ADD_DIALOG = "add_dialog";
     public static final String CLICK_NOTIFICATION = "click_notification";
     public static final String DELETE_NOTIFICATION = "delete_notification";
     public static final String CLICK_SERVICE_NOTIFICATION = "click_service_notification";
@@ -50,17 +51,20 @@ public class NotificationEventReceiver extends BroadcastReceiver {
             case ACTION_ALARM:
                 Bundle bundle = intent.getExtras();
                 mNotificationName = bundle.getString(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME);
-                Intent dialogIntent = new Intent(context, ActivityLogRegister.class);
-                dialogIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, mNotificationName);
-                context.startActivity(dialogIntent);
 
-//                mNotificationUtil.showTimerDoneNotification(mContext, mNotificationName);
-//                // 今回のNotificationの名前を保存しIDとして次の時にメニューと金額を利用する
-//                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME,mNotificationName);
+                if (!SharedPreferencesUtil.getBoolean(mContext, ActivityLogListAll.PREF_KEY_SHOW_DIALOG_FLAG)) {
+                    Intent dialogIntent = new Intent(context, ActivityLogRegister.class);
+                    dialogIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, mNotificationName);
+                    context.startActivity(dialogIntent);
+                }
+
+                mNotificationUtil.showTimerDoneNotification(mContext, mNotificationName);
+                // 今回のNotificationの名前を保存しIDとして次の時にメニューと金額を利用する
+                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME, mNotificationName);
                 break;
 
             case ADD_NOTIFICATION: // 前回と同じ
-                mNotificationName = SharedPreferencesUtil.getString(mContext,ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
+                mNotificationName = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME);
                 realm = Realm.getDefaultInstance();
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
@@ -70,25 +74,12 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                         String mealName = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME + mNotificationName);
                         String price = SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_MEAL_PRICE + mNotificationName);
 
-                        mealLogs.setMealLog(R.mipmap.ic_launcher, mealName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price,"¥"));
+                        mealLogs.setMealLog(R.mipmap.ic_launcher, mealName, new Date(System.currentTimeMillis()), PriceUtil.parsePriceToLong(price, "¥"), mNotificationName);
                     }
                 }, new Realm.Transaction.OnSuccess() {
                     @Override
                     public void onSuccess() {
-                        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                        NotificationUtil notificationUtil = new NotificationUtil();
-                        notificationUtil.cancelNotification(mContext,R.string.app_name);
-                        notificationManager.notify(R.string.app_name, notificationUtil.createNotification(mContext));
-
-                        NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
-                        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-                        // // TODO: 9/13/16 :  createNextNotifyScheduleからSharedPreferencesUtilの部分をぶんりしたい
-                        Calendar calendar = notificationScheduler.createNextNotifySchedule();
-                        Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
-                        // 次のNotificationの名前を保存
-                        broadCastIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
-                        PendingIntent alarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+                        createNextNotification();
                     }
                 }, new Realm.Transaction.OnError() {
                     @Override
@@ -96,6 +87,9 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                         // トランザクションは失敗。自動的にキャンセルされます
                     }
                 });
+                break;
+            case ADD_DIALOG:
+                createNextNotification();
                 break;
             case DELETE_NOTIFICATION:
             case CLICK_NOTIFICATION:
@@ -112,16 +106,32 @@ public class NotificationEventReceiver extends BroadcastReceiver {
                 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
                 // onCreateから呼びなおしているため、通知も元に戻る
                 Intent clickIntent = new Intent(mContext, ActivityLogListAll.class);
-                clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 // TODO : このフラグとかもEnumにするべき？
                 clickIntent.putExtra(ActivityLogListAll.INTENT_KEY_FROM_NOTIFICATION, true);
                 clickIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, mNotificationName);
                 mContext.startActivity(clickIntent);
                 break;
             case CLICK_SERVICE_NOTIFICATION:
-                mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                mContext.startActivity(new Intent(mContext, ActivityLogListAll.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 break;
         }
     }
 
+    public void createNextNotification() {
+        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationUtil notificationUtil = new NotificationUtil();
+        notificationUtil.cancelNotification(mContext, R.string.app_name);
+        notificationManager.notify(R.string.app_name, notificationUtil.createNotification(mContext));
+
+        NotificationScheduler notificationScheduler = new NotificationScheduler(mContext);
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        // // TODO: 9/13/16 :  createNextNotifyScheduleからSharedPreferencesUtilの部分をぶんりしたい
+        Calendar calendar = notificationScheduler.createNextNotifySchedule();
+        Intent broadCastIntent = new Intent(NotificationEventReceiver.ACTION_ALARM);
+        // 次のNotificationの名前を保存
+        broadCastIntent.putExtra(ActivityLogListAll.INTENT_KEY_NOTIFICATION_NAME, SharedPreferencesUtil.getString(mContext, ActivityLogListAll.PREF_KEY_NOTIFICATION_NAME));
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(mContext, 0, broadCastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+    }
 }

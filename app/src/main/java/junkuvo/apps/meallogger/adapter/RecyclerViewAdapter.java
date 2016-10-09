@@ -40,7 +40,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
     private int mLastPosition;
 
     public RecyclerViewAdapter(Context context, RealmResults<MealLogs> data) {
-        super(context ,data, true);
+        super(context, data, true);
         this.mContext = context;
         mLastPosition = data.size();
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -58,10 +58,11 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         ListRowViewHolder viewHolder = new ListRowViewHolder(mContext, mMealLogsRowView);
 
         mMealLogsRowView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                final long id = Long.parseLong(((TextView)v.findViewById(R.id.txtId)).getText().toString());
-                final int year = Integer.parseInt(((TextView)v.findViewById(R.id.txtYear)).getText().toString());
-                final int month = Integer.parseInt(((TextView)v.findViewById(R.id.txtMonth)).getText().toString());
+            @Override
+            public void onClick(View v) {
+                final long id = Long.parseLong(((TextView) v.findViewById(R.id.txtId)).getText().toString());
+                final int year = Integer.parseInt(((TextView) v.findViewById(R.id.txtYear)).getText().toString());
+                final int month = Integer.parseInt(((TextView) v.findViewById(R.id.txtMonth)).getText().toString());
                 String mealMenu = ((TextView) v.findViewById(R.id.txtMealMenu)).getText().toString();
                 String mealPrice = ((TextView) v.findViewById(R.id.txtPrice)).getText().toString();
 
@@ -86,14 +87,14 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                                 final RealmResults<MealLogs> result = bgRealm.where(MealLogs.class).equalTo("id", id).findAll();
 
                                 // TODO : これはUtilクラスに移殖
-                                String mealMenu = ((EditText)layout.findViewById(R.id.edtMealMenu)).getText().toString();
-                                String mealPrice = ((EditText)layout.findViewById(R.id.edtMealPrice)).getText().toString();
+                                String mealMenu = ((EditText) layout.findViewById(R.id.edtMealMenu)).getText().toString();
+                                String mealPrice = ((EditText) layout.findViewById(R.id.edtMealPrice)).getText().toString();
 
                                 // TODO : Updateはこれでいい？
                                 result.get(0).setMenuName(mealMenu);
-                                result.get(0).setPrice(PriceUtil.parsePriceToLong(mealPrice,"¥"));
-                                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME,mealMenu);
-                                SharedPreferencesUtil.saveString(mContext,ActivityLogListAll.PREF_KEY_MEAL_PRICE,mealPrice);
+                                result.get(0).setPrice(PriceUtil.parsePriceToLong(mealPrice, "¥"));
+                                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_MEAL_NAME, mealMenu);
+                                SharedPreferencesUtil.saveString(mContext, ActivityLogListAll.PREF_KEY_MEAL_PRICE, mealPrice);
                             }
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
@@ -152,8 +153,8 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
             public boolean onLongClick(View v) {
 
                 final long id = Long.parseLong(((TextView) v.findViewById(R.id.txtId)).getText().toString());
-                final int year = Integer.parseInt(((TextView)v.findViewById(R.id.txtYear)).getText().toString());
-                final int month = Integer.parseInt(((TextView)v.findViewById(R.id.txtMonth)).getText().toString());
+                final int year = Integer.parseInt(((TextView) v.findViewById(R.id.txtYear)).getText().toString());
+                final int month = Integer.parseInt(((TextView) v.findViewById(R.id.txtMonth)).getText().toString());
                 // Handle long click
                 mAlertDialog = new AlertDialog.Builder(mContext);
                 mAlertDialog.setTitle(mContext.getString(R.string.dialog_title));
@@ -173,11 +174,6 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
                             @Override
                             public void onSuccess() {
                                 updateMonthlyRealm(year, month);
-//                                long sum;
-//                                RealmResults mealLogsForSum = realm.where(MealLogs.class).equalTo("month", month).equalTo("year", year).findAll();
-//                                sum = mealLogsForSum.sum("price").longValue();
-//                                MonthlyMealLog monthlyMealLogToUpdate = new MonthlyMealLog();
-//                                monthlyMealLogToUpdate.setMonthlyMealLog(year, month, sum);
                             }
                         }, new Realm.Transaction.OnError() {
                             @Override
@@ -200,28 +196,29 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
     public void onBindViewHolder(ListRowViewHolder holder, int position) {
         MealLogs mealLogs = getData().get(position);
         holder.getTxtMealMenu().setText(mealLogs.getMenuName());
-        if(mealLogs.getCreatedAt() != null) {
+        if (mealLogs.getCreatedAt() != null) {
             holder.getTxtMealDate().setText(mDateFormat.format(mealLogs.getCreatedAt()));
         }
         holder.getImvThumbnail().setImageResource(mealLogs.getThumbnailResourceID());
-        holder.getTxtPrice().setText(PriceUtil.parseLongToPrice(mealLogs.getPrice(),"¥"));
+        holder.getTxtPrice().setText(PriceUtil.parseLongToPrice(mealLogs.getPrice(), "¥"));
         holder.getTxtId().setText(String.valueOf(mealLogs.getId()));
-        if(position == mLastPosition - 1) {
+        if (position == mLastPosition - 1 && mLastPosition >= 5) {
             holder.getTxtFooterSpace().setVisibility(View.VISIBLE);
-        }else{
+        } else {
             holder.getTxtFooterSpace().setVisibility(View.GONE);
         }
+        holder.getTxtNotificationName().setText(mealLogs.getNotificationName());
 
         Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
         calendar.setTime(mealLogs.getCreatedAt());   // assigns calendar to given date
         int hour = calendar.get(Calendar.HOUR_OF_DAY); // gets hour in 24h format
-        if(hour >= 5 && hour < 10){
+        if (hour >= 5 && hour < 10) {
             holder.getImgNotificationIcon().setImageResource(R.drawable.ic_morning);
-        }else if(hour >= 10 && hour < 15) {
+        } else if (hour >= 10 && hour < 15) {
             holder.getImgNotificationIcon().setImageResource(R.drawable.ic_noon);
-        }else if(hour >= 15 && hour < 18){
+        } else if (hour >= 15 && hour < 18) {
             holder.getImgNotificationIcon().setImageResource(R.drawable.ic_evening);
-        }else{
+        } else {
             holder.getImgNotificationIcon().setImageResource(R.drawable.ic_night);
         }
         holder.getTxtYear().setText(String.valueOf(mealLogs.getYear()));
@@ -245,7 +242,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         this.mLastPosition = mLastPosition;
     }
 
-    public void updateMonthlyRealm(final int year, final int month){
+    public void updateMonthlyRealm(final int year, final int month) {
         long sum;
         RealmResults mealLogsForSum = realm.where(MealLogs.class).equalTo("month", month).equalTo("year", year).findAll();
         sum = mealLogsForSum.sum("price").longValue();

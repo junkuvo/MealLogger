@@ -21,6 +21,7 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
     protected TextView txtId;
     protected TextView txtFooterSpace;
     protected ImageView imgNotificationIcon;
+    protected TextView txtNotificationName;
 
     protected TextView txtYear;
     protected TextView txtMonth;
@@ -32,11 +33,12 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtMealMenu = (TextView) view.findViewById(R.id.txtMealMenu);
         this.txtMealDate = (TextView) view.findViewById(R.id.txtMealDate);
         this.txtPrice = (TextView) view.findViewById(R.id.txtPrice);
-        this.txtId = (TextView)view.findViewById(R.id.txtId);
-        this.txtFooterSpace = (TextView)view.findViewById(R.id.txtFooterSpace);
-        this.imgNotificationIcon = (ImageView)view.findViewById(R.id.imgNotificationIcon);
-        this.txtYear = (TextView)view.findViewById(R.id.txtYear);
-        this.txtMonth = (TextView)view.findViewById(R.id.txtMonth);
+        this.txtId = (TextView) view.findViewById(R.id.txtId);
+        this.txtFooterSpace = (TextView) view.findViewById(R.id.txtFooterSpace);
+        this.imgNotificationIcon = (ImageView) view.findViewById(R.id.imgNotificationIcon);
+        this.txtYear = (TextView) view.findViewById(R.id.txtYear);
+        this.txtMonth = (TextView) view.findViewById(R.id.txtMonth);
+        this.txtNotificationName = (TextView) view.findViewById(R.id.txtNotificationName);
     }
 
     public TextView getTxtId() {
@@ -53,6 +55,14 @@ public class ListRowViewHolder extends RecyclerView.ViewHolder {
 
     public TextView getTxtMealMenu() {
         return txtMealMenu;
+    }
+
+    public TextView getTxtNotificationName() {
+        return txtNotificationName;
+    }
+
+    public void setTxtNotificationName(TextView txtNotificationIcon) {
+        this.txtNotificationName = txtNotificationIcon;
     }
 
     public void setImvThumbnail(ImageView imvThumbnail) {
