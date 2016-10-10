@@ -22,12 +22,6 @@ public class NotificationService extends Service {
     }
 
     @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
-//        handleOnStart(intent,startId);
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         handleOnStart(intent,startId);
         return START_STICKY;
