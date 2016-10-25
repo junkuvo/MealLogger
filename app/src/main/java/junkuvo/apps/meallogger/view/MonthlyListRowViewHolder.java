@@ -16,7 +16,7 @@ public class MonthlyListRowViewHolder extends RecyclerView.ViewHolder {
     protected TextView txtMonthlyPrice;
     protected TextView txtId;
     protected TextView txtMonth;
-    protected TextView txtFooterSpace;
+    protected View vFooterSpace;
 
     public MonthlyListRowViewHolder(Context context, View view) {
         super(view);
@@ -24,7 +24,7 @@ public class MonthlyListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtMonthlyPrice = (TextView) view.findViewById(R.id.txtMonthlyPrice);
         this.txtId = (TextView)view.findViewById(R.id.txtId);
         this.txtMonth = (TextView)view.findViewById(R.id.txtMonth);
-        this.txtFooterSpace = (TextView)view.findViewById(R.id.txtFooterSpace);
+        this.vFooterSpace = view.findViewById(R.id.txtFooterSpace);
 
     }
 
@@ -52,11 +52,11 @@ public class MonthlyListRowViewHolder extends RecyclerView.ViewHolder {
         this.txtMonth = txtMonth;
     }
 
-    public TextView getTxtFooterSpace() {
-        return txtFooterSpace;
+    public View getTxtFooterSpace() {
+        return vFooterSpace;
     }
 
-    public void setTxtFooterSpace(TextView txtFooterSpace) {
-        this.txtFooterSpace = txtFooterSpace;
+    public void setTxtFooterSpace(View vFooterSpace) {
+        this.vFooterSpace = vFooterSpace;
     }
 }

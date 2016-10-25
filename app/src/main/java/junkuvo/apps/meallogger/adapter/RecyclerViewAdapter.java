@@ -60,6 +60,7 @@ public class RecyclerViewAdapter extends RealmRecyclerViewAdapter<MealLogs, List
         mMealLogsRowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO : try catch
                 final long id = Long.parseLong(((TextView) v.findViewById(R.id.txtId)).getText().toString());
                 final int year = Integer.parseInt(((TextView) v.findViewById(R.id.txtYear)).getText().toString());
                 final int month = Integer.parseInt(((TextView) v.findViewById(R.id.txtMonth)).getText().toString());

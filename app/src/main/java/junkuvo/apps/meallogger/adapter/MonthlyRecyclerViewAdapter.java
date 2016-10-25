@@ -31,7 +31,7 @@ public class MonthlyRecyclerViewAdapter extends RealmRecyclerViewAdapter<Monthly
     public MonthlyListRowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         // Inflate the custom layout
-        mMealLogsRowView = inflater.inflate(R.layout.monthly_list_row, null);
+        mMealLogsRowView = inflater.inflate(R.layout.monthly_list_row, parent, false);
 
         return new MonthlyListRowViewHolder(mContext, mMealLogsRowView);
     }
